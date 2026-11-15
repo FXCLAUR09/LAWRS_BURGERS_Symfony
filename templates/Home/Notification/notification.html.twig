@@ -1,0 +1,107 @@
+
+{# CUSTOMER ORDER NOTIFICATIONS #}
+
+<div class="customer-notifications" style="padding:12px 16px;">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">
+
+        <strong style="font-size:12px;letter-spacing:.04em;">
+            ORDER NOTIFICATIONS
+        </strong>
+
+        {% if unreadNotificationCount > 0 %}
+            <span style="font-size:11px;color:#d93636;font-weight:700;">
+                {{ unreadNotificationCount }} NEW
+            </span>
+        {% endif %}
+
+    </div>
+
+
+    {% if notificationActionMessage is defined and notificationActionMessage is not empty %}
+
+        <p
+            role="status"
+            style="margin:0 0 8px;padding:7px 9px;border-radius:8px;background:rgba(216,163,109,.10);color:#e8c69e;font-size:11px;line-height:1.4;"
+        >
+            {{ notificationActionMessage }}
+        </p>
+
+    {% endif %}
+
+
+    {% if customerNotifications is not empty %}
+
+        {% for notification in customerNotifications %}
+
+            <div
+                class="customer-notification-item"
+                style="
+                    display:flex;
+                    align-items:flex-start;
+                    gap:8px;
+                    padding:9px 10px;
+                    margin-top:6px;
+                    border-radius:10px;
+                    background:{{ notification.is_read == 0 ? 'rgba(217,54,54,.10)' : 'rgba(255,255,255,.035)' }};
+                    border-left:3px solid {{ notification.is_read == 0 ? '#d93636' : 'rgba(215,215,215,.45)' }};
+                "
+            >
+
+                <a
+                    href="{{ path('cart') }}#my-orders"
+                    style="display:block;flex:1;min-width:0;color:inherit;text-decoration:none;overflow-wrap:anywhere;"
+                >
+
+                    <span style="display:block;font-size:12px;font-weight:700;line-height:1.35;">
+                        {{ notification.title }}
+                    </span>
+
+                    <span style="display:block;margin-top:3px;font-size:12px;line-height:1.45;overflow-wrap:anywhere;">
+                        {{ notification.message }}
+                    </span>
+
+                    <span style="display:block;margin-top:4px;font-size:10px;opacity:.7;">
+                        {{ notification.created_at|date('M j, g:i A') }}
+                    </span>
+
+                </a>
+
+
+                <form
+                    method="POST"
+                    action="{{ path('customer_notification_delete', {id: notification.id}) }}"
+                    style="flex:0 0 auto;margin:0;"
+                >
+
+                    <input
+                        type="hidden"
+                        name="_token"
+                        value="{{ csrf_token('notification_delete_' ~ notification.id) }}"
+                    >
+
+                    <button
+                        type="submit"
+                        aria-label="Remove notification: {{ notification.title }}"
+                        title="Remove notification"
+                        onclick="return confirm('Remove this notification? This will not delete your order.');"
+                        style="display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;padding:0;border:1px solid rgba(255,255,255,.15);border-radius:50%;background:rgba(255,255,255,.06);color:#ffd8cf;font-size:16px;line-height:1;cursor:pointer;"
+                    >
+                        &times;
+                    </button>
+
+                </form>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p style="margin:0;padding:8px 0;font-size:12px;opacity:.7;line-height:1.5;">
+            No order notifications yet.
+        </p>
+
+    {% endif %}
+
+</div>

@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Burger | Lawr's Burgers</title>
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+</head>
+<body>
+<div class="admin-layout">
+
+    {% include 'Admin/sidebar.html.twig' ignore missing %}
+
+    <main class="admin-main">
+        <header class="admin-topbar">
+            <div>
+                <div class="breadcrumb">{{ app.session.get('staff_id') ? 'STAFF / BURGERS' : 'ADMIN / BURGERS' }}</div>
+                <h1>Edit Burger</h1>
+            </div>
+
+            <div class="admin-user">
+                <div class="user-avatar">
+                    {{ (admin_username|default('Admin'))|first|upper }}
+                </div>
+                <div class="user-info">
+                    <strong>{{ admin_username|default('Admin') }}</strong>
+                    <span>{{ app.session.get('staff_id') ? 'Staff' : 'Administrator' }}</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="admin-content">
+            <div class="edit-burger-page">
+
+                <div class="edit-page-header">
+                    <div class="edit-page-title">
+                        <h2>Edit Burger</h2>
+                        <p>Update burger information. Stock is managed separately through Restock Burger.</p>
+                    </div>
+
+                    <a href="{{ path('admin_burgers') }}" class="edit-back-button">
+                        ← Back to Burgers
+                    </a>
+                </div>
+
+                <div class="edit-burger-card">
+                    <div class="edit-card-header">
+                        <div class="edit-card-header-inner">
+                            <div class="edit-header-icon">🍔</div>
+                            <div>
+                                <h3>Burger Information</h3>
+                                <p>Update the details of this burger.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form
+                        method="POST"
+                        action="{{ path('admin_burger_edit', {id: burger.id}) }}"
+                        enctype="multipart/form-data"
+                        class="edit-burger-form"
+                    >
+                        {% if error %}
+                            <div class="edit-form-error" role="alert">
+                                {{ error }}
+                            </div>
+                        {% endif %}
+
+                        <div class="edit-form-grid">
+                            <div class="edit-form-group">
+                                <label for="name">Burger Name <span class="edit-required">*</span></label>
+                                <input
+                                    type="text"
+                                    id="name"
+                                    name="name"
+                                    value="{{ form.name }}"
+                                    required
+                                >
+                            </div>
+
+                            <div class="edit-form-group">
+                                <label for="category">Category <span class="edit-required">*</span></label>
+                                <select id="category" name="category" required>
+                                    <option value="">Select a category</option>
+                                    {% for category in categories %}
+                                        <option
+                                            value="{{ category }}"
+                                            {% if form.category == category %}selected{% endif %}
+                                        >
+                                            {{ category }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="edit-form-group full-width">
+                                <label for="description">Description <span class="edit-required">*</span></label>
+                                <textarea id="description" name="description" required>{{ form.description }}</textarea>
+                                <span class="edit-form-hint">
+                                    Keep the description clear and appealing to customers.
+                                </span>
+                            </div>
+
+                            <div class="edit-form-group">
+                                <label for="price">Price (PHP) <span class="edit-required">*</span></label>
+                                <input
+                                    type="number"
+                                    id="price"
+                                    name="price"
+                                    step="0.01"
+                                    min="0"
+                                    value="{{ form.price }}"
+                                    required
+                                >
+                                <span class="edit-form-hint">Enter the price in Philippine pesos.</span>
+                            </div>
+
+                            <div class="edit-form-group">
+                                <label>Stock Management</label>
+                                <div class="edit-stock-display">
+                                    Current Stock:
+                                    <strong>{{ burger.stock_quantity }}</strong>
+                                </div>
+                                <span class="edit-form-hint">
+                                    Change stock through the Restock Burger page.
+                                </span>
+                            </div>
+
+                            <div class="image-section">
+                                <div class="current-image">
+                                    {% if burger.image %}
+                                        <img
+                                            src="{{ asset('assets/' ~ burger.image) }}"
+                                            alt="{{ burger.name }}"
+                                        >
+                                    {% else %}
+                                        <span class="no-image">🍔</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="image-details">
+                                    <strong>Burger Image</strong>
+                                    <p>
+                                        This is the current burger image. Upload a new one only
+                                        if you want to replace it.
+                                    </p>
+
+                                    <input
+                                        type="file"
+                                        id="image"
+                                        name="image"
+                                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                    >
+
+                                    <span class="edit-form-hint">
+                                        JPG, JPEG, PNG, or WEBP. Maximum size: 5 MB.
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="availability-box">
+                                <div class="availability-info">
+                                    <div class="availability-icon">✓</div>
+                                    <div class="availability-text">
+                                        <strong>Burger Available</strong>
+                                        <span>Make this burger available for customers to order.</span>
+                                    </div>
+                                </div>
+
+                                <label class="edit-toggle">
+                                    <input
+                                        type="checkbox"
+                                        name="available"
+                                        value="1"
+                                        {% if form.available %}checked{% endif %}
+                                    >
+                                    <span class="edit-toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="edit-form-footer">
+                            <a href="{{ path('admin_burgers') }}" class="edit-cancel-button">
+                                Cancel
+                            </a>
+
+                            <button type="submit" class="edit-save-button">
+                                ✓ Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <footer class="admin-footer">
+            <span>© {{ "now"|date("Y") }} Lawr's Burgers</span>
+            <span>Admin Panel</span>
+        </footer>
+    </main>
+</div>
+</body>
+</html>

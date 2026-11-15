@@ -1,0 +1,410 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard | Lawr's Burgers Admin</title>
+
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="admin-layout">
+    {% include 'Admin/sidebar.html.twig' %}
+
+    <main class="admin-main">
+
+        <header class="admin-topbar">
+            <div>
+                <div class="breadcrumb">ADMIN / DASHBOARD</div>
+                <h1>Dashboard</h1>
+            </div>
+
+            <div class="admin-user">
+                <div class="user-avatar">
+                    {{ admin_username|slice(0, 1)|upper }}
+                </div>
+
+                <div class="user-info">
+                    <strong>{{ admin_username }}</strong>
+                    <span>Administrator</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="welcome-banner">
+            <div class="welcome-content">
+                <p class="welcome-small">WELCOME BACK</p>
+                <h2>Good day, {{ admin_username }}!</h2>
+                <p>Here's what's happening with Lawr's Burgers today.</p>
+            </div>
+
+            <div class="welcome-burger">🍔</div>
+        </section>
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-icon orange">🍔</div>
+                <div class="stat-content">
+                    <span class="stat-label">TOTAL BURGERS</span>
+                    <strong class="stat-number">{{ total_burgers }}</strong>
+                    <span class="stat-description">
+                        {{ available_burgers }} currently available
+                    </span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon burgundy">🛒</div>
+                <div class="stat-content">
+                    <span class="stat-label">TOTAL ORDERS</span>
+                    <strong class="stat-number">{{ total_orders }}</strong>
+                    <span class="stat-description">
+                        {{ pending_orders }} pending
+                    </span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">₱</div>
+                <div class="stat-content">
+                    <span class="stat-label">TOTAL SALES</span>
+                    <strong class="stat-number">
+                        ₱{{ total_sales|number_format(2, '.', ',') }}
+                    </strong>
+                    <span class="stat-description">Overall sales</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon dark">★</div>
+                <div class="stat-content">
+                    <span class="stat-label">TODAY'S SALES</span>
+                    <strong class="stat-number">
+                        ₱{{ today_sales|number_format(2, '.', ',') }}
+                    </strong>
+                    <span class="stat-description">Sales today</span>
+                </div>
+            </div>
+
+        </section>
+
+
+        <section class="lb-staff-duty lb-panel">
+            <div class="lb-duty-heading">
+                <div><span class="lb-eyebrow">TEAM PRESENCE</span><h2>Staff On Duty</h2><p>Live staff availability based on recent activity.</p></div>
+                <span class="lb-duty-count" id="lbDutyCount">{{ staff_on_duty|filter(s => s.is_online)|length }} ON DUTY</span>
+            </div>
+            {% if staff_on_duty is not empty %}
+                <div class="lb-duty-list" id="lbDutyList">
+                    {% for member in staff_on_duty %}
+                        <div class="lb-duty-person">
+                            <div class="lb-duty-avatar">{{ member.name|default('S')|slice(0, 1)|upper }}</div>
+                            <div class="lb-duty-details"><strong>{{ member.name }}</strong><span>@{{ member.username }}</span></div>
+                            <div class="lb-duty-status {{ member.is_online ? 'is-online' : 'is-offline' }}"><i></i>{{ member.is_online ? 'On Duty' : 'Offline' }}</div>
+                            <small>{% if member.is_online %}Active now{% elseif member.last_seen_at %}Last seen {{ member.last_seen_at|date('M d, g:i A') }}{% else %}Not signed in yet{% endif %}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="lb-duty-empty">No active staff accounts found.</div>
+            {% endif %}
+        </section>
+
+        <script>
+        (() => {
+            const list = document.getElementById('lbDutyList');
+            const count = document.getElementById('lbDutyCount');
+            if (!list || !count) return;
+            const refreshStaffPresence = async () => {
+                try {
+                    const response = await fetch('{{ path("admin_staff_presence") }}', {credentials: 'same-origin', headers: {'X-Requested-With': 'XMLHttpRequest'}});
+                    if (!response.ok) return;
+                    const payload = await response.json();
+                    const staff = payload.staff || [];
+                    const onDuty = staff.filter(person => Number(person.is_online) === 1).length;
+                    count.textContent = onDuty + ' ON DUTY';
+                    list.replaceChildren();
+                    if (!staff.length) {
+                        const empty = document.createElement('div'); empty.className = 'lb-duty-empty'; empty.textContent = 'No active staff accounts found.'; list.appendChild(empty); return;
+                    }
+                    staff.forEach(person => {
+                        const online = Number(person.is_online) === 1;
+                        const card = document.createElement('div'); card.className = 'lb-duty-person';
+                        const avatar = document.createElement('div'); avatar.className = 'lb-duty-avatar'; avatar.textContent = (person.name || 'S').trim().charAt(0).toUpperCase();
+                        const details = document.createElement('div'); details.className = 'lb-duty-details';
+                        const name = document.createElement('strong'); name.textContent = person.name || 'Staff';
+                        const username = document.createElement('span'); username.textContent = '@' + (person.username || ''); details.append(name, username);
+                        const status = document.createElement('div'); status.className = 'lb-duty-status ' + (online ? 'is-online' : 'is-offline');
+                        const dot = document.createElement('i'); status.append(dot, document.createTextNode(online ? 'On Duty' : 'Offline'));
+                        const seen = document.createElement('small');
+                        if (online) seen.textContent = 'Active now';
+                        else if (person.last_seen_at) seen.textContent = 'Last seen ' + new Date(String(person.last_seen_at).replace(' ', 'T')).toLocaleString();
+                        else seen.textContent = 'Not signed in yet';
+                        card.append(avatar, details, status, seen); list.appendChild(card);
+                    });
+                } catch (error) { /* Keep the last successfully rendered presence state. */ }
+            };
+            window.setInterval(refreshStaffPresence, 15000);
+        })();
+        </script>
+
+        <section class="lb-analytics-grid">
+            <article class="lb-panel lb-chart-panel">
+                <div class="lb-panel-heading">
+                    <div><span class="lb-eyebrow">PERFORMANCE</span><h2>Sales Overview</h2><p>Daily sales for the last seven days</p></div>
+                    <span class="lb-live-tag">LIVE DATA</span>
+                </div>
+                <div class="lb-chart-wrap"><canvas id="lbSalesChart" aria-label="Sales over the last seven days"></canvas></div>
+            </article>
+
+            <article class="lb-panel lb-status-panel">
+                <div class="lb-panel-heading"><div><span class="lb-eyebrow">ORDER BREAKDOWN</span><h2>Order Status</h2><p>Current order distribution</p></div></div>
+                <div class="lb-doughnut-wrap"><canvas id="lbOrdersChart" aria-label="Order status distribution"></canvas></div>
+                <div class="lb-chart-legend" id="lbOrderLegend"></div>
+            </article>
+        </section>
+
+        <section class="lb-progress-grid">
+            <article class="lb-panel lb-progress-card">
+                <div class="lb-ring" style="--ring-value: {{ completion_rate }}; --ring-color: #6f8b3a"><div><strong>{{ completion_rate }}%</strong><span>Completed</span></div></div>
+                <div class="lb-progress-copy"><span class="lb-eyebrow">ORDER PERFORMANCE</span><h3>Order Completion</h3><p>Share of orders marked completed or delivered.</p></div>
+            </article>
+            <article class="lb-panel lb-progress-card">
+                <div class="lb-ring" style="--ring-value: {{ availability_rate }}; --ring-color: #ff9100"><div><strong>{{ availability_rate }}%</strong><span>Available</span></div></div>
+                <div class="lb-progress-copy"><span class="lb-eyebrow">INVENTORY HEALTH</span><h3>Burger Availability</h3><p>{{ available_burgers }} of {{ total_burgers }} burger items are available.</p></div>
+            </article>
+            <article class="lb-panel lb-progress-card">
+                <div class="lb-ring" style="--ring-value: {{ pending_rate }}; --ring-color: #641c1c"><div><strong>{{ pending_rate }}%</strong><span>Pending</span></div></div>
+                <div class="lb-progress-copy"><span class="lb-eyebrow">NEEDS ATTENTION</span><h3>Pending Orders</h3><p>{{ pending_orders }} orders are waiting for action.</p></div>
+            </article>
+        </section>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+        (() => {
+            const salesRows = {{ sales_trend|json_encode|raw }};
+            const statusRows = {{ order_status_rows|json_encode|raw }};
+            const money = value => '₱' + Number(value).toLocaleString('en-PH', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+            const salesCanvas = document.getElementById('lbSalesChart');
+            if (salesCanvas && window.Chart) {
+                const salesMap = new Map(salesRows.map(row => [row.day, Number(row.sales)]));
+                const labels = [];
+                const values = [];
+                for (let offset = 6; offset >= 0; offset--) {
+                    const day = new Date();
+                    day.setDate(day.getDate() - offset);
+                    const key = day.getFullYear() + '-' + String(day.getMonth()+1).padStart(2,'0') + '-' + String(day.getDate()).padStart(2,'0');
+                    labels.push(day.toLocaleDateString('en-US', {month:'short', day:'numeric'}));
+                    values.push(salesMap.get(key) || 0);
+                }
+                new Chart(salesCanvas, {type:'line', data:{labels, datasets:[{label:'Sales',data:values,borderColor:'#641c1c',backgroundColor:'rgba(255,145,0,.16)',fill:true,tension:.38,borderWidth:3,pointRadius:4,pointBackgroundColor:'#ff9100'}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>money(ctx.parsed.y)}}},scales:{x:{grid:{display:false},ticks:{color:'#777'}},y:{beginAtZero:true,grid:{color:'rgba(30,20,10,.07)'},ticks:{color:'#777',callback:money}}}}});
+            }
+            const orderCanvas = document.getElementById('lbOrdersChart');
+            if (orderCanvas && window.Chart) {
+                const palette = ['#641c1c','#ff9100','#6f8b3a','#292421','#d8b98c','#a65a36'];
+                new Chart(orderCanvas, {type:'doughnut',data:{labels:statusRows.map(r=>r.status),datasets:[{data:statusRows.map(r=>Number(r.total)),backgroundColor:palette,borderWidth:3,borderColor:'#fffaf2',hoverOffset:6}]},options:{cutout:'70%',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+                const legend=document.getElementById('lbOrderLegend');
+                statusRows.forEach((row,i)=>{const item=document.createElement('div');item.className='lb-legend-item';item.innerHTML='<span style="background:'+palette[i%palette.length]+'"></span><b></b><em></em>';item.querySelector('b').textContent=row.status;item.querySelector('em').textContent=row.total;legend.appendChild(item);});
+            }
+        })();
+        </script>
+
+        <section class="dashboard-grid">
+
+            {# RECENT ORDERS #}
+            <div class="dashboard-card orders-card">
+                <div class="card-header">
+                    <div>
+                        <span class="card-label">ORDER MANAGEMENT</span>
+                        <h2>Recent Orders</h2>
+                    </div>
+
+                    <a href="{{ path('admin_orders') }}" class="card-link">
+                        View All →
+                    </a>
+                </div>
+
+                {% if recent_orders is not empty %}
+                    <div class="table-wrapper">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ORDER</th>
+                                    <th>CUSTOMER</th>
+                                    <th>TOTAL</th>
+                                    <th>STATUS</th>
+                                    <th>DATE</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                            {% for order in recent_orders %}
+                                {% set status_class = order.status|lower|replace({' ': '-'}) %}
+
+                                <tr>
+                                    <td>
+                                        <strong class="order-id">
+                                            #{{ order.id }}
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        <div class="customer-cell">
+                                            <strong>{{ order.customer_name }}</strong>
+                                            <span>{{ order.phone }}</span>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <strong>
+                                            ₱{{ order.total|number_format(2, '.', ',') }}
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        <span class="status-badge {{ status_class }}">
+                                            {{ order.status }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="date-cell">
+                                            {{ order.created_at|date('M d, Y') }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">🛒</div>
+                        <h3>No orders yet</h3>
+                        <p>Customer orders will appear here.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            {# BURGER STOCK #}
+            <div class="dashboard-card stock-card">
+                <div class="card-header">
+                    <div>
+                        <span class="card-label">INVENTORY</span>
+                        <h2>Burger Stock</h2>
+                    </div>
+
+                    <span class="stock-count">{{ total_burgers }} items</span>
+                </div>
+
+                {% if low_stock_burgers is not empty %}
+                    <div class="stock-list">
+                        {% for burger in low_stock_burgers %}
+                            {% set quantity = burger.stock_quantity|default(0) %}
+
+                            {% if quantity <= 10 %}
+                                {% set stock_class = 'low' %}
+                            {% elseif quantity <= 20 %}
+                                {% set stock_class = 'medium' %}
+                            {% else %}
+                                {% set stock_class = 'good' %}
+                            {% endif %}
+
+                            <div class="stock-item">
+                                <div class="stock-info">
+                                    <strong>{{ burger.name }}</strong>
+
+                                    <span>
+                                        {% if burger.available == 1 %}
+                                            Available
+                                        {% else %}
+                                            Unavailable
+                                        {% endif %}
+                                    </span>
+                                </div>
+
+                                <div class="stock-number {{ stock_class }}">
+                                    {{ quantity }}
+                                    <small>left</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">🍔</div>
+                        <h3>No burgers found</h3>
+                    </div>
+                {% endif %}
+            </div>
+
+        </section>
+
+        {# QUICK ACTIONS #}
+        <section class="quick-actions">
+
+            <div class="section-heading">
+                <span class="card-label">MANAGEMENT</span>
+                <h2>Quick Actions</h2>
+            </div>
+
+            <div class="action-grid">
+
+                <a href="{{ path('admin_burgers') }}" class="action-card">
+                    <div class="action-icon">
+                        🍔
+                    </div>
+
+                    <div>
+                        <strong>Manage Burgers</strong>
+                        <span>Add, edit, or remove burgers</span>
+                    </div>
+
+                    <span class="action-arrow">→</span>
+                </a>
+
+                <a href="{{ path('admin_orders') }}" class="action-card">
+                    <div class="action-icon">
+                        🛒
+                    </div>
+
+                    <div>
+                        <strong>Manage Orders</strong>
+                        <span>View and update customer orders</span>
+                    </div>
+
+                    <span class="action-arrow">→</span>
+                </a>
+
+                <a href="#" class="action-card">
+                    <div class="action-icon">
+                        📊
+                    </div>
+
+                    <div>
+                        <strong>View Reports</strong>
+                        <span>Check sales and order reports</span>
+                    </div>
+
+                    <span class="action-arrow">→</span>
+                </a>
+
+            </div>
+        </section>
+
+        <footer class="admin-footer">
+            <span>© {{ "now"|date("Y") }} Lawr's Burgers</span>
+            <span>Admin Panel</span>
+        </footer>
+
+    </main>
+</div>
+
+</body>
+</html>

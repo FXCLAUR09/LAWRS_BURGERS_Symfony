@@ -1,0 +1,116 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Profile | Lawr's Burgers{% endblock %}
+
+{% block body %}
+
+<section class="checkout-page profile-edit-page">
+    <div class="checkout-card profile-edit-card">
+
+        <div class="checkout-heading">
+            <p class="script">Your Account</p>
+            <h1>EDIT PROFILE</h1>
+            <p>Update your personal information and account password.</p>
+        </div>
+
+        <div class="checkout-card">
+
+            <div class="checkout-card-heading">
+                <span>👤</span>
+                <h2>PROFILE INFORMATION</h2>
+            </div>
+
+            {# Validation Errors #}
+            {% if errors is not empty %}
+                <div class="review-message error">
+                    {% for error in errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# Success Messages #}
+            {% for message in app.flashes('success') %}
+                <div class="review-message success">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            <form method="POST"
+                  action="{{ path('profile_edit') }}"
+                  class="checkout-form">
+
+                <input
+                    type="hidden"
+                    name="_token"
+                    value="{{ csrf_token('edit_profile') }}"
+                >
+
+                <label for="name">FULL NAME</label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value="{{ customer.name|default('') }}"
+                    placeholder="Enter your full name"
+                    maxlength="150"
+                    required
+                >
+
+                <label for="email">EMAIL ADDRESS</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="{{ customer.email|default('') }}"
+                    placeholder="Enter your email address"
+                    maxlength="150"
+                    required
+                >
+
+                <div class="checkout-card-heading">
+                    <span>🔒</span>
+                    <h2>CHANGE PASSWORD</h2>
+                </div>
+
+                <p>
+                    Leave these fields blank if you do not want to change
+                    your current password.
+                </p>
+
+                <label for="new_password">NEW PASSWORD</label>
+                <input
+                    type="password"
+                    id="new_password"
+                    name="new_password"
+                    placeholder="Enter new password"
+                    minlength="6"
+                    maxlength="255"
+                >
+
+                <label for="confirm_password">CONFIRM NEW PASSWORD</label>
+                <input
+                    type="password"
+                    id="confirm_password"
+                    name="confirm_password"
+                    placeholder="Confirm your new password"
+                    maxlength="255"
+                >
+
+                <button type="submit" class="place-order-btn">
+                    SAVE CHANGES
+                </button>
+
+                <a href="{{ path('home') }}" class="back-cart-btn">
+                    CANCEL
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

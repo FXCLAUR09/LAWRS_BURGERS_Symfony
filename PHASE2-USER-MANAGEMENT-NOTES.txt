@@ -1,0 +1,32 @@
+LAWRS BURGERS - PHASE 2 USER MANAGEMENT
+
+Included:
+- Admin-only User Management page at /admin/users.
+- Create Admin accounts (username + password) and Staff accounts (name, username, email, password).
+- List/search Admin and Staff accounts.
+- Edit Admin username/password and Staff name, username, email, password.
+- Activate/deactivate Staff accounts.
+- Delete Admin/Staff accounts with CSRF-protected POST actions and confirmation prompts.
+- Prevent deletion of the currently signed-in Admin and prevent deleting the final Admin account.
+- Passwords are stored with PHP password_hash(PASSWORD_DEFAULT).
+- Staff deactivation updates staff_presence.logged_out_at; staff_presence is removed automatically on staff deletion through the existing FK cascade.
+
+Database:
+- No migration or schema change is included or required.
+- Uses the existing admin_users and staff_users columns from the supplied SQL dump.
+- Role conversion is intentionally not implemented: Admin and Staff are separate tables and the current schema has no role column.
+- No SQL dump should be imported over the live database.
+
+After replacing the project files, run in the VS Code terminal:
+  docker exec lawrs_burgers_app php bin/console cache:clear
+  docker exec lawrs_burgers_app php bin/console debug:router
+
+Then sign in as Admin and open:
+  http://127.0.0.1:8000/admin/users
+
+Test account creation/edit/status/deletion using test accounts first. Do not delete the only Admin account.
+
+Validation performed on the package:
+- PHP syntax lint across application PHP files.
+- ZIP integrity test.
+- No live Docker/database/browser test was performed while preparing this package.

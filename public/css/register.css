@@ -1,0 +1,593 @@
+
+/*
+ * ==========================================================
+ * LAWR'S BURGERS - REGISTER PAGE
+ * Original XAMPP registration page styling
+ * Separated into an external CSS file for Symfony
+ * ==========================================================
+ */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+body {
+    font-family: "DM Sans", sans-serif;
+}
+
+
+/*
+ * ==========================================================
+ * PAGE BACKGROUND
+ * ==========================================================
+ */
+
+.register-page {
+    position: relative;
+
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 50px 20px;
+
+    background:
+        linear-gradient(
+            rgba(0, 0, 0, 0.72),
+            rgba(0, 0, 0, 0.82)
+        ),
+        url("../assets/about-burger.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+
+    overflow-y: auto;
+}
+
+
+/*
+ * ==========================================================
+ * GLASS CARD
+ * ==========================================================
+ */
+
+.register-card {
+    position: relative;
+
+    width: 100%;
+    max-width: 460px;
+
+    background: rgba(255, 255, 255, 0.10);
+
+    border: 1px solid rgba(255, 255, 255, 0.20);
+
+    border-radius: 20px;
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.10);
+
+    overflow: hidden;
+}
+
+
+/*
+ * ==========================================================
+ * BRAND
+ * ==========================================================
+ */
+
+.register-brand {
+    text-align: center;
+
+    padding: 32px 25px 25px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.register-brand .brand-main {
+    margin: 0;
+
+    font-family: "Bebas Neue", sans-serif;
+
+    font-size: 62px;
+
+    line-height: 0.82;
+
+    color: #ff9700;
+
+    letter-spacing: 3px;
+
+    text-shadow:
+        0 4px 15px rgba(255, 151, 0, 0.20);
+}
+
+.register-brand .brand-sub {
+    margin-top: 5px;
+
+    font-family: "Bebas Neue", sans-serif;
+
+    font-size: 26px;
+
+    line-height: 1;
+
+    color: #ffffff;
+
+    letter-spacing: 6px;
+}
+
+.customer-label {
+    margin: 13px 0 0;
+
+    font-family: "DM Sans", sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: 2.5px;
+
+    color: #ff9700;
+
+    text-transform: uppercase;
+}
+
+
+/*
+ * ==========================================================
+ * CONTENT
+ * ==========================================================
+ */
+
+.register-content {
+    padding: 30px 35px 28px;
+}
+
+.register-content h1 {
+    margin: 0;
+
+    font-family: "Bebas Neue", sans-serif;
+
+    font-size: 38px;
+
+    line-height: 1;
+
+    color: #ffffff;
+
+    letter-spacing: 1px;
+}
+
+.register-description {
+    margin: 8px 0 25px;
+
+    font-family: "DM Sans", sans-serif;
+
+    font-size: 14px;
+
+    color: rgba(255, 255, 255, 0.70);
+
+    line-height: 1.5;
+}
+
+
+/*
+ * ==========================================================
+ * ERROR
+ * ==========================================================
+ */
+
+.register-error {
+    margin-bottom: 20px;
+
+    padding: 12px 14px;
+
+    border-radius: 10px;
+
+    background: rgba(220, 53, 69, 0.16);
+
+    border: 1px solid rgba(255, 100, 110, 0.35);
+
+    color: #ffb5bb;
+
+    font-family: "DM Sans", sans-serif;
+
+    font-size: 13px;
+
+    line-height: 1.4;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.12);
+}
+
+
+/*
+ * ==========================================================
+ * SUCCESS
+ * ==========================================================
+ */
+
+.register-success {
+    margin-bottom: 20px;
+
+    padding: 12px 14px;
+
+    border-radius: 10px;
+
+    background: rgba(25, 135, 84, 0.16);
+
+    border: 1px solid rgba(80, 220, 145, 0.30);
+
+    color: #a9f5cc;
+
+    font-family: "DM Sans", sans-serif;
+
+    font-size: 13px;
+
+    line-height: 1.4;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.12);
+}
+
+
+/*
+ * ==========================================================
+ * FORM
+ * ==========================================================
+ */
+
+.register-form-group {
+    margin-bottom: 17px;
+}
+
+.register-form-group label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-family: "DM Sans", sans-serif;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    color: rgba(255, 255, 255, 0.90);
+}
+
+.register-form-group input {
+    width: 100%;
+
+    padding: 13px 14px;
+
+    border: 1px solid rgba(255, 255, 255, 0.20);
+
+    border-radius: 9px;
+
+    background: rgba(0, 0, 0, 0.30);
+
+    color: #ffffff;
+
+    font-family: "DM Sans", sans-serif;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.register-form-group input:hover {
+    background: rgba(0, 0, 0, 0.38);
+
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.register-form-group input:focus {
+    border-color: #ff9700;
+
+    background: rgba(0, 0, 0, 0.42);
+
+    box-shadow:
+        0 0 0 3px rgba(255, 151, 0, 0.14),
+        0 5px 20px rgba(0, 0, 0, 0.12);
+}
+
+.register-form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+}
+
+.register-form-group input:-webkit-autofill,
+.register-form-group input:-webkit-autofill:hover,
+.register-form-group input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff;
+
+    transition:
+        background-color 9999s ease-in-out 0s;
+}
+
+
+/*
+ * ==========================================================
+ * PASSWORD NOTE
+ * ==========================================================
+ */
+
+.password-note {
+    margin-top: 6px;
+
+    font-family: "DM Sans", sans-serif;
+
+    font-size: 11px;
+
+    color: rgba(255, 255, 255, 0.50);
+}
+
+
+/*
+ * ==========================================================
+ * BUTTON
+ * ==========================================================
+ */
+
+.register-button {
+    width: 100%;
+
+    margin-top: 5px;
+
+    padding: 14px 20px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #ff9700;
+
+    color: #080808;
+
+    font-family: "Bebas Neue", sans-serif;
+
+    font-size: 22px;
+
+    letter-spacing: 1.5px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.register-button:hover {
+    background: #ffffff;
+
+    color: #111111;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.30);
+}
+
+.register-button:active {
+    transform: translateY(0);
+
+    box-shadow:
+        0 5px 15px rgba(0, 0, 0, 0.20);
+}
+
+
+/*
+ * ==========================================================
+ * FOOTER
+ * ==========================================================
+ */
+
+.register-footer {
+    padding: 20px 25px 25px;
+
+    text-align: center;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.register-footer p {
+    margin: 0 0 10px;
+
+    font-family: "DM Sans", sans-serif;
+
+    font-size: 13px;
+
+    color: rgba(255, 255, 255, 0.60);
+}
+
+.register-footer a {
+    font-family: "DM Sans", sans-serif;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    color: #ff9700;
+
+    text-decoration: none;
+
+    transition:
+        color 0.2s ease,
+        text-shadow 0.2s ease;
+}
+
+.register-footer a:hover {
+    color: #ffffff;
+
+    text-shadow:
+        0 0 10px rgba(255, 255, 255, 0.30);
+}
+
+.back-website {
+    display: inline-block;
+
+    margin-top: 7px;
+
+    color: rgba(255, 255, 255, 0.55) !important;
+
+    font-weight: 500 !important;
+}
+
+.back-website:hover {
+    color: #ff9700 !important;
+
+    text-shadow: none !important;
+}
+
+
+/*
+ * ==========================================================
+ * MOBILE
+ * ==========================================================
+ */
+
+@media (max-width: 600px) {
+
+    .register-page {
+        padding: 25px 14px;
+
+        background-attachment: scroll;
+    }
+
+    .register-card {
+        max-width: 100%;
+
+        border-radius: 17px;
+    }
+
+    .register-brand {
+        padding: 27px 20px 22px;
+    }
+
+    .register-brand .brand-main {
+        font-size: 50px;
+    }
+
+    .register-brand .brand-sub {
+        font-size: 22px;
+
+        letter-spacing: 5px;
+    }
+
+    .register-content {
+        padding: 28px 23px 25px;
+    }
+
+    .register-content h1 {
+        font-size: 34px;
+    }
+
+    .register-description {
+        font-size: 13px;
+    }
+
+    .register-footer {
+        padding: 18px 20px 23px;
+    }
+}
+
+
+@media (max-width: 380px) {
+
+    .register-brand .brand-main {
+        font-size: 45px;
+    }
+
+    .register-brand .brand-sub {
+        font-size: 20px;
+    }
+
+    .register-content {
+        padding-left: 19px;
+        padding-right: 19px;
+    }
+}
+
+
+/*
+ * ==========================================================
+ * PASSWORD VISIBILITY TOGGLE
+ * ==========================================================
+ */
+
+.password-field {
+    position: relative;
+    width: 100%;
+}
+
+.password-field input {
+    padding-right: 52px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+
+    width: 38px;
+    height: 38px;
+
+    padding: 0;
+    border: 0;
+
+    background: transparent;
+    color: rgba(255,255,255,.58);
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    transition:
+        color .2s ease,
+        background .2s ease;
+}
+
+.password-toggle:hover {
+    color: #ff9700;
+    background: rgba(255,255,255,.08);
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid #ff9700;
+    outline-offset: 2px;
+}
+
+.eye-icon {
+    width: 20px;
+    height: 20px;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}

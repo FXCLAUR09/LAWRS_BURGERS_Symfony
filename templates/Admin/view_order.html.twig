@@ -1,0 +1,539 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}View Order #{{ order.id }} | Lawr's Burgers Admin{% endblock %}
+
+{% block body %}
+
+{% set status = order.status|default('Pending')|lower|trim %}
+
+{% set status_class = {
+    'completed': 'order-completed',
+    'preparing': 'order-preparing',
+    'ready': 'order-ready',
+    'out for delivery': 'order-delivery',
+    'cancelled': 'order-cancelled',
+    'canceled': 'order-cancelled',
+    'confirmed': 'order-confirmed',
+    'pending': 'order-pending'
+}[status]|default('order-pending') %}
+
+<div class="admin-layout">
+
+    {% include 'Admin/sidebar.html.twig' ignore missing %}
+
+    <main class="admin-main">
+
+        {# ==================================================
+           TOPBAR
+        ================================================== #}
+
+        <header class="admin-topbar">
+
+            <div>
+                <div class="breadcrumb">ORDER MANAGEMENT</div>
+                <h1>Order #{{ order.id }}</h1>
+            </div>
+
+            <div class="admin-user">
+
+                <div class="user-avatar">
+                    {{ admin_username|default('Admin')|slice(0, 1)|upper }}
+                </div>
+
+                <div class="user-info">
+                    <strong>{{ admin_username|default('Admin') }}</strong>
+                    <span>{{ app.session.get('staff_id') ? 'Staff' : 'Administrator' }}</span>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="admin-content">
+
+            {# ==================================================
+               PAGE HEADER
+            ================================================== #}
+
+            <div class="content-header">
+
+                <div>
+                    <h2>Order #{{ order.id }}</h2>
+                    <p>View customer information, ordered items, and manage the order.</p>
+                </div>
+
+                <div class="order-header-actions">
+                    <a href="{{ path('admin_orders') }}" class="admin-button cancel-button">
+                        ← Back to Orders
+                    </a>
+                </div>
+
+            </div>
+
+
+            {# ==================================================
+               FLASH MESSAGES
+            ================================================== #}
+
+            {% for message in app.flashes('success') %}
+
+                <div class="admin-alert admin-alert-success">
+                    <span class="alert-icon">✓</span>
+                    <span>{{ message }}</span>
+                </div>
+
+            {% endfor %}
+
+            {% for message in app.flashes('error') %}
+
+                <div class="admin-alert admin-alert-error">
+                    <span class="alert-icon">!</span>
+                    <span>{{ message }}</span>
+                </div>
+
+            {% endfor %}
+
+
+            {# ==================================================
+               CUSTOMER AND ORDER INFORMATION
+            ================================================== #}
+
+            <div class="order-detail-grid">
+
+                {# CUSTOMER INFORMATION #}
+
+                <div class="admin-card order-detail-card">
+
+                    <div class="detail-card-header">
+
+                        <div class="detail-icon">👤</div>
+
+                        <div>
+                            <h3>Customer Information</h3>
+                            <p>Customer contact details</p>
+                        </div>
+
+                    </div>
+
+                    <div class="detail-content">
+
+                        <div class="detail-row">
+                            <span>Name</span>
+                            <strong>{{ order.customer_name|default('Unknown customer') }}</strong>
+                        </div>
+
+                        <div class="detail-row">
+                            <span>Phone</span>
+                            <strong>{{ order.phone|default('—') }}</strong>
+                        </div>
+
+                        <div class="detail-row detail-row-column">
+                            <span>Delivery Address</span>
+                            <strong>{{ order.address|default('—')|nl2br }}</strong>
+                        </div>
+
+                        {% if order.notes|default('') %}
+
+                            <div class="detail-row detail-row-column">
+                                <span>Customer Notes</span>
+                                <strong>{{ order.notes|nl2br }}</strong>
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                {# ORDER INFORMATION #}
+
+                <div class="admin-card order-detail-card">
+
+                    <div class="detail-card-header">
+
+                        <div class="detail-icon">📋</div>
+
+                        <div>
+                            <h3>Order Information</h3>
+                            <p>Payment and order status</p>
+                        </div>
+
+                    </div>
+
+                    <div class="detail-content">
+
+                        <div class="detail-row">
+                            <span>Order Number</span>
+                            <strong>#{{ order.id }}</strong>
+                        </div>
+
+                        <div class="detail-row">
+                            <span>Created By</span>
+                            <strong>{{ order.created_by_staff_name|default('Online / Legacy') }}</strong>
+                        </div>
+
+                        <div class="detail-row">
+                            <span>Payment Method</span>
+                            <strong>{{ order.payment_method|default('Not specified') }}</strong>
+                        </div>
+
+                        <div class="detail-row">
+                            <span>Payment Status</span>
+                            <strong>{{ order.payment_status|default('Unknown') }}</strong>
+                        </div>
+
+                        {% if order.gcash_reference|default('') %}
+
+                            <div class="detail-row detail-row-column">
+                                <span>Website GCash Reference</span>
+                                <strong>{{ order.gcash_reference }}</strong>
+                            </div>
+
+                        {% endif %}
+
+                        <div class="detail-row">
+                            <span>Order Date</span>
+                            <strong>
+                                {% if order.created_at %}
+                                    {{ order.created_at|date('M d, Y h:i A') }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </strong>
+                        </div>
+
+                        <div class="detail-row">
+                            <span>Current Status</span>
+
+                            <span class="order-status-badge {{ status_class }}">
+                                {{ order.status|default('Pending') }}
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {# ==================================================
+               ORDERED ITEMS
+            ================================================== #}
+
+            <div class="admin-card order-items-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h3>Ordered Items</h3>
+                        <p>Burgers included in this order.</p>
+                    </div>
+
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table class="admin-table order-items-table">
+
+                        <thead>
+                            <tr>
+                                <th>Burger</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for item in items %}
+
+                                <tr>
+
+                                    <td>
+                                        <div class="order-item-name">
+
+                                            <div class="order-item-icon">🍔</div>
+
+                                            <div>
+                                                <strong>{{ item.burger_name }}</strong>
+                                            </div>
+
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        ₱{{ item.price|number_format(2, '.', ',') }}
+                                    </td>
+
+                                    <td>
+                                        <span class="quantity-badge">
+                                            {{ item.quantity }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <strong class="item-subtotal">
+                                            ₱{{ item.subtotal|number_format(2, '.', ',') }}
+                                        </strong>
+                                    </td>
+
+                                </tr>
+
+                            {% else %}
+
+                                <tr>
+                                    <td colspan="4" class="empty-table">
+                                        <div class="empty-icon">📦</div>
+                                        <h3>No Order Items</h3>
+                                        <p>No items were found for this order.</p>
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="order-total-section">
+
+                    <span>Order Total</span>
+
+                    <strong>
+                        ₱{{ order.total|number_format(2, '.', ',') }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            {# ==================================================
+               MANAGE ORDER
+               HIDDEN WHEN COMPLETED OR CANCELLED
+            ================================================== #}
+
+            {% if order.status != 'Completed' and order.status != 'Cancelled' %}
+
+                <div class="admin-card update-status-card">
+
+                    <div class="detail-card-header">
+
+                        <div class="detail-icon">🔄</div>
+
+                        <div>
+                            <h3>Manage Order</h3>
+                            <p>Update the status of this customer order.</p>
+                        </div>
+
+                    </div>
+
+                    <form
+                        action="{{ path('admin_order_update_status', {id: order.id}) }}"
+                        method="POST"
+                        class="status-form"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="_token"
+                            value="{{ csrf_token('order_status_' ~ order.id) }}"
+                        >
+
+                        <div class="status-form-group">
+
+                            <label for="status">Order Status</label>
+
+                            <select id="status" name="status" required>
+
+                                {% for option in [
+                                    'Pending',
+                                    'Confirmed',
+                                    'Preparing',
+                                    'Ready',
+                                    'Out for Delivery',
+                                    'Completed',
+                                    'Cancelled'
+                                ] %}
+
+                                    <option
+                                        value="{{ option }}"
+                                        {% if order.status == option %}selected{% endif %}
+                                    >
+                                        {{ option }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <button type="submit" class="admin-button save-button">
+                            Update Order Status
+                        </button>
+
+                    </form>
+
+                </div>
+
+            {% elseif order.status == 'Cancelled' %}
+
+                <div class="admin-card update-status-card">
+
+                    <div class="detail-card-header">
+
+                        <div class="detail-icon">⚠️</div>
+
+                        <div>
+                            <h3>Cancelled Order</h3>
+                            <p>This order has been cancelled and its stock restoration has been processed.</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+            {# ==================================================
+               PAYMENT VERIFICATION
+            ================================================== #}
+
+            <div class="admin-card update-status-card">
+
+                <div class="detail-card-header">
+
+                    <div class="detail-icon">💳</div>
+
+                    <div>
+                        <h3>Payment Verification</h3>
+                        <p>Verify the payment separately from the order status.</p>
+                    </div>
+
+                </div>
+
+                <div class="detail-content">
+
+                    <div class="detail-row">
+                        <span>Payment Method</span>
+                        <strong>{{ order.payment_method|default('Not specified') }}</strong>
+                    </div>
+
+                    <div class="detail-row">
+                        <span>Current Payment Status</span>
+                        <strong>{{ order.payment_status|default('Unknown') }}</strong>
+                    </div>
+
+                </div>
+
+
+                {% if
+                    order.status != 'Completed'
+                    and order.status != 'Cancelled'
+                    and (
+                        (order.payment_method == 'GCash' and order.payment_status == 'Pending Verification')
+                        or
+                        (order.payment_method == 'Cash on Delivery' and order.payment_status == 'Unpaid')
+                    )
+                %}
+
+                    <form
+                        method="post"
+                        action="{{ path('admin_order_payment', {id: order.id}) }}"
+                        class="status-form"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="_token"
+                            value="{{ csrf_token('order_payment_' ~ order.id) }}"
+                        >
+
+                        {% if order.payment_method == 'GCash' %}
+
+                            <button
+                                type="submit"
+                                name="payment_action"
+                                value="confirm"
+                                class="admin-button save-button"
+                                onclick="return confirm('Confirm that you verified this GCash payment?');"
+                            >
+                                Verify GCash Payment
+                            </button>
+
+                            <button
+                                type="submit"
+                                name="payment_action"
+                                value="reject"
+                                class="admin-button cancel-button"
+                                onclick="return confirm('Reject this GCash payment?');"
+                            >
+                                Reject Payment
+                            </button>
+
+                        {% elseif order.payment_method == 'Cash on Delivery' %}
+
+                            <p>
+                                Only confirm after you have physically received the cash.
+                            </p>
+
+                            <button
+                                type="submit"
+                                name="payment_action"
+                                value="confirm"
+                                class="admin-button save-button"
+                                onclick="return confirm('Confirm that you received the cash payment?');"
+                            >
+                                Confirm Cash Received
+                            </button>
+
+                        {% endif %}
+
+                    </form>
+
+                {% else %}
+
+                    <p>
+                        No payment action is available for the current payment status.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+                {% if order.status == 'Completed' and order.payment_status == 'Paid' %}
+                    {% include 'Partials/_order_receipt.html.twig' with {
+                        order: order,
+                        receiptItems: items
+                    } only %}
+                {% endif %}
+
+
+        </section>
+
+
+        {# ==================================================
+           FOOTER
+        ================================================== #}
+
+        <footer class="admin-footer">
+            <p>
+                © {{ 'now'|date('Y') }} Lawr's Burgers. Admin Panel.
+            </p>
+        </footer>
+
+    </main>
+
+</div>
+
+{% endblock %}

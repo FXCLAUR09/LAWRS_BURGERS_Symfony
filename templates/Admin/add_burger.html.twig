@@ -1,0 +1,244 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Burger | Lawr's Burgers</title>
+
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+
+    <style>
+        .add-burger-page { max-width: 1100px; margin: 0 auto; }
+        .add-page-header { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:22px; }
+        .add-page-title h2 { margin:0 0 5px; font-size:28px; color:#171717; }
+        .add-page-title p { margin:0; color:#777; font-size:13px; }
+        .add-burger-card { background:#fff; border:1px solid #e8e3db; border-radius:18px; box-shadow:0 10px 35px rgba(0,0,0,.06); overflow:hidden; }
+        .form-card-header { padding:24px 28px; background:linear-gradient(135deg,#fff8ed,#fff); border-bottom:1px solid #eee7dc; }
+        .form-card-header-inner { display:flex; align-items:center; gap:15px; }
+        .form-header-icon { width:50px; height:50px; display:flex; align-items:center; justify-content:center; background:#fff0d8; border:1px solid #ffd9a3; border-radius:13px; font-size:25px; }
+        .form-card-header h3 { margin:0 0 4px; font-size:19px; color:#252525; }
+        .form-card-header p { margin:0; color:#999; font-size:12px; }
+        .burger-form { padding:30px; }
+        .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+        .form-group { display:flex; flex-direction:column; gap:8px; min-width:0; }
+        .form-group.full-width, .availability-box { grid-column:1/-1; }
+        .form-group label { font-size:12px; font-weight:900; color:#333; text-transform:uppercase; letter-spacing:.5px; }
+        .required { color:var(--orange); }
+        .form-group input, .form-group textarea, .form-group select { width:100%; box-sizing:border-box; padding:13px 14px; background:#faf9f7; border:1px solid #ded9d1; border-radius:9px; color:#222; font-family:inherit; font-size:14px; }
+        .form-group input, .form-group select { min-height:48px; }
+        .form-group textarea { min-height:120px; resize:vertical; }
+        .input-hint { font-size:11px; color:#999; }
+        .image-upload-area { display:flex; align-items:center; gap:20px; padding:20px; background:#faf8f4; border:2px dashed #ded7cd; border-radius:12px; }
+        .image-preview { width:100px; height:100px; min-width:100px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#f1ece4; border:1px solid #e2dcd2; border-radius:12px; font-size:35px; }
+        .image-preview img { width:100%; height:100%; object-fit:contain; display:none; }
+        .image-upload-content { flex:1; min-width:0; }
+        .image-upload-content strong { display:block; margin-bottom:5px; font-size:14px; color:#333; }
+        .image-upload-content p { margin:0 0 12px; color:#999; font-size:11px; line-height:1.5; }
+        .choose-image-button { display:inline-flex; padding:9px 15px; background:#fff; color:var(--orange); border:1px solid #ffd29a; border-radius:8px; font-size:12px; font-weight:900; cursor:pointer; }
+        #image { display:none; }
+        .image-file-name { display:block; margin-top:7px; color:#777; font-size:11px; overflow-wrap:anywhere; }
+        .availability-box { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:17px 18px; background:#faf8f4; border:1px solid #e8e2d9; border-radius:11px; }
+        .availability-info { display:flex; align-items:center; gap:12px; }
+        .availability-icon { width:38px; height:38px; display:flex; align-items:center; justify-content:center; background:#edf5df; border-radius:9px; }
+        .availability-text strong { display:block; margin-bottom:3px; color:#333; font-size:13px; }
+        .availability-text span { color:#999; font-size:11px; }
+        .toggle { position:relative; width:52px; height:28px; flex-shrink:0; }
+        .toggle input { opacity:0; width:0; height:0; }
+        .toggle-slider { position:absolute; inset:0; cursor:pointer; background:#d7d3cd; border-radius:30px; transition:.2s; }
+        .toggle-slider:before { content:""; position:absolute; width:22px; height:22px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
+        .toggle input:checked + .toggle-slider { background:var(--orange); }
+        .toggle input:checked + .toggle-slider:before { transform:translateX(24px); }
+        .form-error { margin-bottom:25px; padding:13px 16px; background:#fff0f0; border:1px solid #f0cccc; border-left:4px solid #a43838; border-radius:8px; color:#a43838; font-size:13px; font-weight:700; overflow-wrap:anywhere; }
+        .form-footer { display:flex; justify-content:flex-end; gap:10px; margin-top:30px; padding-top:24px; border-top:1px solid #eee9e2; }
+        .cancel-button, .save-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 20px; border-radius:9px; font-size:13px; font-weight:800; text-decoration:none; cursor:pointer; }
+        .cancel-button { background:#f5f3ef; color:#666; border:1px solid #dedad3; }
+        .save-button { background:var(--orange); color:#fff; border:0; }
+        @media(max-width:700px) {
+            .form-grid { grid-template-columns:1fr; }
+            .form-group.full-width, .availability-box { grid-column:auto; }
+            .burger-form { padding:20px; }
+            .add-page-header { align-items:flex-start; flex-direction:column; }
+            .image-upload-area { align-items:flex-start; flex-direction:column; }
+            .form-footer { flex-direction:column-reverse; }
+            .cancel-button, .save-button { width:100%; box-sizing:border-box; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="admin-layout">
+    {% include 'Admin/sidebar.html.twig' %}
+
+    <main class="admin-main">
+        <header class="admin-topbar">
+            <div>
+                <div class="breadcrumb">{{ app.session.get('staff_id') ? 'STAFF / BURGERS' : 'ADMIN / BURGERS' }}</div>
+                <h1>Add Burger</h1>
+            </div>
+
+            <div class="admin-user">
+                <div class="user-avatar">{{ (app.session.get('staff_name') ?: admin_username|default('Admin'))|slice(0, 1)|upper }}</div>
+                <div class="user-info">
+                    <strong>{{ app.session.get('staff_name') ?: admin_username|default('Admin') }}</strong>
+                    <span>{{ app.session.get('staff_id') ? 'Staff' : 'Administrator' }}</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="admin-content">
+            <div class="add-burger-page">
+                <div class="add-page-header">
+                    <div class="add-page-title">
+                        <h2>Create New Burger</h2>
+                        <p>Add a new burger to your menu and manage its inventory.</p>
+                    </div>
+
+                    <a href="{{ path('admin_burgers') }}" class="cancel-button">
+                        ← Back to Burgers
+                    </a>
+                </div>
+
+                <div class="add-burger-card">
+                    <div class="form-card-header">
+                        <div class="form-card-header-inner">
+                            <div class="form-header-icon">🍔</div>
+                            <div>
+                                <h3>Burger Information</h3>
+                                <p>Enter the details of the burger you want to add.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="POST"
+                          action="{{ path('admin_burger_add') }}"
+                          enctype="multipart/form-data"
+                          class="burger-form">
+
+                        {% if error %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endif %}
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="name">Burger Name <span class="required">*</span></label>
+                                <input type="text" id="name" name="name"
+                                       placeholder="e.g. Classic Smash"
+                                       value="{{ form.name }}" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="category">Category <span class="required">*</span></label>
+                                <select id="category" name="category" required>
+                                    <option value="">Select category</option>
+                                    {% for category in ['Signature Burgers', 'Classic Burgers', 'Premium Burgers', 'Special Burgers'] %}
+                                        <option value="{{ category }}" {% if form.category == category %}selected{% endif %}>
+                                            {{ category }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="description">Description <span class="required">*</span></label>
+                                <textarea id="description" name="description"
+                                          placeholder="Describe the burger, ingredients, flavor, etc."
+                                          required>{{ form.description }}</textarea>
+                                <span class="input-hint">Keep the description short and appealing to customers.</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="price">Price (₱) <span class="required">*</span></label>
+                                <input type="number" id="price" name="price"
+                                       placeholder="149.00" min="0" step="0.01"
+                                       value="{{ form.price }}" required>
+                                <span class="input-hint">Enter the price in Philippine pesos.</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="stock_quantity">Stock Quantity <span class="required">*</span></label>
+                                <input type="number" id="stock_quantity" name="stock_quantity"
+                                       placeholder="50" min="0" step="1"
+                                       value="{{ form.stock_quantity }}" required>
+                                <span class="input-hint">Initial quantity currently in stock.</span>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="image">Burger Image <span class="required">*</span></label>
+                                <div class="image-upload-area">
+                                    <div class="image-preview" id="imagePreview">
+                                        🍔
+                                        <img id="previewImage" src="" alt="Burger preview">
+                                    </div>
+
+                                    <div class="image-upload-content">
+                                        <strong>Upload Burger Photo</strong>
+                                        <p>JPG, PNG, or WEBP. Maximum file size: 5 MB.</p>
+                                        <label for="image" class="choose-image-button">Choose Image</label>
+                                        <input type="file" id="image" name="image"
+                                               accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                               required>
+                                        <span class="image-file-name" id="imageFileName">No image selected</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="availability-box">
+                                <div class="availability-info">
+                                    <div class="availability-icon">✓</div>
+                                    <div class="availability-text">
+                                        <strong>Burger Available</strong>
+                                        <span>Make this burger visible and orderable on the website.</span>
+                                    </div>
+                                </div>
+
+                                <label class="toggle">
+                                    <input type="checkbox" name="available" value="1"
+                                           {% if form.available == '1' %}checked{% endif %}>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-footer">
+                            <a href="{{ path('admin_burgers') }}" class="cancel-button">Cancel</a>
+                            <button type="submit" class="save-button">＋ Add Burger</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <footer class="admin-footer">
+            <p>© {{ 'now'|date('Y') }} Lawr's Burgers. Admin Panel.</p>
+        </footer>
+    </main>
+</div>
+
+<script>
+const imageInput = document.getElementById('image');
+const previewImage = document.getElementById('previewImage');
+const imageFileName = document.getElementById('imageFileName');
+
+imageInput.addEventListener('change', function () {
+    const file = this.files[0];
+
+    if (!file) {
+        previewImage.style.display = 'none';
+        previewImage.removeAttribute('src');
+        imageFileName.textContent = 'No image selected';
+        return;
+    }
+
+    imageFileName.textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        previewImage.src = event.target.result;
+        previewImage.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+});
+</script>
+</body>
+</html>

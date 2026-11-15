@@ -1,0 +1,662 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Reviews | Lawr's Burgers{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <!-- GOOGLE FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700;800&family=Pacifico&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- MAIN WEBSITE CSS -->
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<!-- =========================================================
+     REVIEWS PAGE
+========================================================= -->
+
+<section class="reviews-page">
+
+    <!-- PAGE HEADER -->
+
+    <div class="reviews-header">
+
+        <div class="small-title">
+            What Our Customers Say
+        </div>
+
+        <h1>
+            CUSTOMER REVIEWS
+        </h1>
+
+        <p>
+            Every burger is made with care, and every review helps us
+            become better. See what our customers think about
+            Lawr's Burgers.
+        </p>
+
+    </div>
+
+
+    <!-- SUCCESS / ERROR MESSAGE -->
+
+    {# SUCCESS / ERROR MESSAGE #}
+
+{% if message is not empty %}
+
+    <div class="review-message {{ message_type }}">
+        {{ message }}
+    </div>
+
+{% endif %}
+
+{% for flashMessage in app.flashes('success') %}
+
+    <div class="review-message success">
+        {{ flashMessage }}
+    </div>
+
+{% endfor %}
+
+
+    <!-- RATING SUMMARY -->
+
+    <div class="reviews-summary">
+
+
+        <!-- OVERALL RATING -->
+
+        <div class="overall-rating">
+
+            <div class="rating-number">
+
+                {{ average_rating|number_format(1) }}
+
+            </div>
+
+
+            <div class="rating-stars">
+
+                {% set rounded_rating = average_rating|round %}
+
+                {% for i in 1..5 %}
+
+                    {{ i <= rounded_rating ? '★' : '☆' }}
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="rating-count">
+
+                Based on
+
+                {{ total_reviews }}
+
+                review{{ total_reviews == 1 ? '' : 's' }}
+
+            </div>
+
+        </div>
+
+
+
+        <!-- STAR BREAKDOWN -->
+
+        <div class="rating-breakdown">
+
+            {% for star in 5..1 %}
+
+                {% set count = star_counts[star] %}
+
+                {% set percentage = total_reviews > 0
+                    ? (count / total_reviews) * 100
+                    : 0
+                %}
+
+
+                <div class="rating-row">
+
+                    <div class="rating-label">
+
+                        {{ star }} ★
+
+                    </div>
+
+
+                    <div class="rating-bar">
+
+                        <div
+                            class="rating-bar-fill"
+                            style="width: {{ percentage }}%;"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="rating-total">
+
+                        {{ count }}
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+
+    <!-- REVIEWS + FORM -->
+
+    <div class="reviews-layout">
+
+
+        <!-- CUSTOMER REVIEWS -->
+
+        <div class="reviews-list">
+
+            {% if reviews|length > 0 %}
+
+                {% for review in reviews %}
+
+                    <article class="review-card">
+
+
+                        <div class="review-top">
+
+
+                            <div>
+
+                                <div class="reviewer-name">
+
+                                    {{ review.customer_name }}
+
+                                </div>
+
+
+                                <div class="review-date">
+
+                                    {{ review.created_at|date('F j, Y') }}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="review-stars">
+
+                                {% for i in 1..5 %}
+
+                                    {{ i <= review.rating ? '★' : '☆' }}
+
+                                {% endfor %}
+
+                            </div>
+
+
+                        </div>
+
+
+                        <p class="review-text">
+
+                            {{ review.review_text|nl2br }}
+
+                        </p>
+
+
+                    </article>
+
+                {% endfor %}
+
+
+            {% else %}
+
+
+                <div class="no-reviews">
+
+                    <div class="no-reviews-icon">
+                        🍔
+                    </div>
+
+
+                    <h3>
+                        NO REVIEWS YET
+                    </h3>
+
+
+                    <p>
+                        Be the first customer to leave a review!
+                    </p>
+
+                </div>
+
+
+            {% endif %}
+
+        </div>
+
+
+
+        <!-- WRITE A REVIEW -->
+
+        <div class="review-form-card">
+
+
+            <h2>
+                WRITE A REVIEW
+            </h2>
+
+
+            <p>
+                Had a great burger? Tell us what you think!
+            </p>
+
+
+            <form
+                method="POST"
+                action="{{ path('reviews') }}"
+            >
+
+
+                <!-- NAME -->
+
+                <div class="review-form-group">
+
+                    <label for="customer_name">
+                        YOUR NAME
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="customer_name"
+                        name="customer_name"
+                        placeholder="Enter your name"
+                        maxlength="100"
+                        value="{{ customer_name }}"
+                        required
+                    >
+
+                </div>
+
+
+
+                <!-- RATING -->
+
+                <div class="review-form-group">
+
+                    <label>
+                        YOUR RATING
+                    </label>
+
+
+                    <div class="star-selector">
+
+                        {% for star in 5..1 %}
+
+                            <input
+                                type="radio"
+                                id="star{{ star }}"
+                                name="rating"
+                                value="{{ star }}"
+                                {% if rating == star %}
+                                    checked
+                                {% endif %}
+                            >
+
+                            <label for="star{{ star }}">
+                                ★
+                            </label>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- REVIEW -->
+
+                <div class="review-form-group">
+
+                    <label for="review_text">
+                        YOUR REVIEW
+                    </label>
+
+
+                    <textarea
+                        id="review_text"
+                        name="review_text"
+                        placeholder="Tell us about your burger..."
+                        maxlength="1000"
+                        required
+                    >{{ review_text }}</textarea>
+
+                </div>
+
+
+
+                <!-- SUBMIT -->
+
+                <button
+                    type="submit"
+                    class="submit-review-btn"
+                >
+
+                    SUBMIT REVIEW
+
+                </button>
+
+
+            </form>
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer class="site-footer" id="contact">
+
+
+    <div class="footer-main">
+
+
+        <!-- BRAND -->
+
+        <div class="footer-brand-area">
+
+            <a
+                class="footer-logo"
+                href="{{ path('home') }}"
+            >
+
+                <span class="footer-logo-main">
+                    LAWR’S
+                </span>
+
+                <span class="footer-logo-sub">
+                    BURGERS
+                </span>
+
+            </a>
+
+
+            <p class="footer-slogan">
+
+                GOOD BURGERS.<br>
+                GOOD MOOD.
+
+            </p>
+
+
+            <p class="footer-description">
+
+                Fresh burgers, bold flavors,<br>
+                and good food made for everyone.
+
+            </p>
+
+
+            <div class="footer-socials">
+
+                <a
+                    href="#"
+                    aria-label="Facebook"
+                >
+
+                    <img
+                        src="{{ asset('assets/facebook.png') }}"
+                        alt="Facebook"
+                    >
+
+                </a>
+
+
+                <a
+                    href="#"
+                    aria-label="Instagram"
+                >
+
+                    <img
+                        src="{{ asset('assets/instagram.png') }}"
+                        alt="Instagram"
+                    >
+
+                </a>
+
+
+                <a
+                    href="#"
+                    aria-label="X"
+                >
+
+                    <img
+                        src="{{ asset('assets/x-icon.png') }}"
+                        alt="X"
+                    >
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- QUICK LINKS -->
+
+        <div class="footer-links-area">
+
+            <h3>
+                QUICK LINKS
+            </h3>
+
+
+            <a href="{{ path('home') }}">
+                Home
+            </a>
+
+
+            <a href="{{ path('menu') }}">
+                Our Menu
+            </a>
+
+
+            <a href="{{ path('home') }}#about">
+                About Us
+            </a>
+
+
+            <a href="{{ path('home') }}#identity">
+                Gallery
+            </a>
+
+
+            <a href="{{ path('reviews') }}">
+                Reviews
+            </a>
+
+
+            <a href="{{ path('home') }}#contact">
+                Contact
+            </a>
+
+        </div>
+
+
+
+        <!-- HOURS -->
+
+        <div class="footer-hours-area">
+
+            <h3>
+                HOURS
+            </h3>
+
+
+            <div class="footer-hour-group">
+
+                <strong>
+                    MON - FRI
+                </strong>
+
+                <span>
+                    10:00 AM - 9:00 PM
+                </span>
+
+            </div>
+
+
+            <div class="footer-hour-group">
+
+                <strong>
+                    SATURDAY
+                </strong>
+
+                <span>
+                    10:00 AM - 10:00 PM
+                </span>
+
+            </div>
+
+
+            <div class="footer-hour-group">
+
+                <strong>
+                    SUNDAY
+                </strong>
+
+                <span>
+                    10:00 AM - 8:00 PM
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- CONTACT -->
+
+        <div class="footer-contact-area">
+
+
+            <p class="footer-big-slogan">
+
+                SAVOR THE<br>
+                ULTIMATE <span>BURGER.</span>
+
+            </p>
+
+
+            <h3>
+                CONTACT US
+            </h3>
+
+
+            <div class="footer-contact-item">
+
+                <span class="footer-contact-icon">
+                    ☎
+                </span>
+
+                <span>
+                    +63 994 072 5885
+                </span>
+
+            </div>
+
+
+            <div class="footer-contact-item">
+
+                <span class="footer-contact-icon">
+                    ✉
+                </span>
+
+                <span>
+                    lawrsburgers@gmail.com
+                </span>
+
+            </div>
+
+
+            <div class="footer-contact-item">
+
+                <span class="footer-contact-icon">
+                    📍
+                </span>
+
+                <span>
+                    Dumaguete City,<br>
+                    Negros Oriental, Philippines
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- COPYRIGHT -->
+
+    <div class="footer-bottom">
+
+        <div class="footer-divider"></div>
+
+
+        <p>
+
+            ©
+            <span id="year">
+                2026
+            </span>
+
+            Lawr’s Burgers.
+            All Rights Reserved.
+
+        </p>
+
+    </div>
+
+
+</footer>
+
+{% endblock %}
+
+
+{% block javascripts %}
+
+    {{ parent() }}
+
+    <script src="{{ asset('js/script.js') }}"></script>
+
+{% endblock %}

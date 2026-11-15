@@ -1,0 +1,200 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Orders | Lawr's Burgers Admin{% endblock %}
+
+{% block body %}
+<div class="admin-layout">
+    {% include 'Admin/sidebar.html.twig' ignore missing %}
+
+    <main class="admin-main">
+        <header class="admin-topbar">
+            <div>
+                <div class="breadcrumb">{{ app.session.get('staff_id') ? 'STAFF / ORDERS' : 'ADMIN / ORDERS' }}</div>
+                <h1>Orders</h1>
+            </div>
+
+            <div class="admin-user">
+                <div class="user-avatar">
+                    {{ (app.session.get('staff_name') ?: admin_username)|slice(0, 1)|upper }}
+                </div>
+                <div class="user-info">
+                    <strong>{{ app.session.get('staff_name') ?: admin_username }}</strong>
+                    <span>{{ app.session.get('staff_id') ? 'Staff' : 'Administrator' }}</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="admin-content">
+            {% for message in app.flashes('success') %}
+                <div class="admin-alert admin-alert-success">
+                    <span class="alert-icon">✓</span>
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('error') %}
+                <div class="admin-alert admin-alert-error">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            <div class="content-header">
+                <span class="card-label">ORDERS MANAGEMENT</span>
+                {% if app.session.get('staff_id') %}
+                    <a class="btn-primary" href="{{ path('staff_order_add') }}">+ Create Order</a>
+                {% endif %}
+            </div>
+
+            <div class="admin-card order-management-card">
+                <div class="card-header">
+                    <div>
+                        <h3>Customer Orders</h3>
+                        <p>All orders received from your website.</p>
+                    </div>
+
+                    <div class="order-count">
+                        {{ total_orders }}
+                        {{ total_orders == 1 ? 'Order' : 'Orders' }}
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="admin-table order-table">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Customer</th>
+                                <th>Created By</th>
+                                <th>Payment</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for order in orders %}
+                                {% set status = order.status|default('Pending')|lower|trim %}
+
+                                {% set status_class = {
+                                    'completed': 'order-completed',
+                                    'preparing': 'order-preparing',
+                                    'out for delivery': 'order-delivery',
+                                    'cancelled': 'order-cancelled',
+                                    'canceled': 'order-cancelled'
+                                }[status]|default('order-pending') %}
+
+                                <tr>
+                                    <td>
+                                        <span class="order-id">
+                                            #{{ order.id }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="order-customer">
+                                            <div class="order-customer-avatar">
+                                                {{ order.customer_name|default('C')|slice(0, 1)|upper }}
+                                            </div>
+
+                                            <div class="order-customer-info">
+                                                <strong>
+                                                    {{ order.customer_name|default('Unknown customer') }}
+                                                </strong>
+                                                <span>{{ order.phone|default('—') }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {% if order.created_by_staff_id %}
+                                            {{ order.created_by_staff_name|default('Staff #' ~ order.created_by_staff_id) }}
+                                        {% else %}
+                                            <span class="text-muted">Online / Legacy</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if order.payment_method|default('') == 'GCash' %}
+                                            <span class="payment-badge gcash-payment">
+                                                GCash
+                                            </span>
+                                        {% else %}
+                                            <span class="payment-badge cod-payment">
+                                                {{ order.payment_method|default('Not specified') }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <strong class="order-price">
+                                            ₱{{ order.total|default(0)|number_format(2, '.', ',') }}
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        <span class="order-status-badge {{ status_class }}">
+                                            {{ order.status|default('Pending') }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="order-date">
+                                            {% if order.created_at %}
+                                                <strong>
+                                                    {{ order.created_at|date('M d, Y') }}
+                                                </strong>
+                                                <span>
+                                                    {{ order.created_at|date('h:i A') }}
+                                                </span>
+                                            {% else %}
+                                                <span>—</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="table-actions">
+                                            <a
+                                                href="{{ path('admin_order_view', {id: order.id}) }}"
+                                                class="action-button view-button"
+                                            >
+                                                View
+                                            </a>
+                                            {% if not app.session.get('staff_id') or (order.created_by_staff_id and order.created_by_staff_id == app.session.get('staff_id')) %}
+                                                <form method="post" action="{{ path('admin_order_delete', {id: order.id}) }}" onsubmit="return confirm('Delete this order and restore its stock?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_order_' ~ order.id) }}">
+                                                    <button type="submit" class="action-button" style="border:0;cursor:pointer">Delete</button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="empty-table">
+                                        <div class="empty-icon">📦</div>
+                                        <h3>No Orders Found</h3>
+                                        <p>
+                                            Customer orders will appear here once someone places an order.
+                                        </p>
+                                        <a href="{{ path('admin_burgers') }}" class="admin-button">
+                                            Back to Dashboard Items
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <footer class="admin-footer">
+            <p>© {{ 'now'|date('Y') }} Lawr's Burgers. Admin Panel.</p>
+        </footer>
+    </main>
+</div>
+{% endblock %}

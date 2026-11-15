@@ -1,0 +1,282 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Burgers | Lawr's Burgers Admin</title>
+
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap"
+        rel="stylesheet"
+    >
+</head>
+
+<body>
+
+<div class="admin-layout">
+
+    {# EXISTING ADMIN SIDEBAR #}
+    {% include 'Admin/sidebar.html.twig' %}
+
+    <main class="admin-main">
+
+        {# TOP BAR #}
+        <header class="admin-topbar">
+
+            <div>
+                <div class="breadcrumb">{{ app.session.get('staff_id') ? 'STAFF / BURGERS' : 'ADMIN / BURGERS' }}</div>
+                <h1>Burgers</h1>
+            </div>
+
+            <div class="admin-user">
+                <div class="user-avatar">
+                    {{ admin_username|default('Admin')|first|upper }}
+                </div>
+
+                <div class="user-info">
+                    <strong>{{ admin_username|default('Admin') }}</strong>
+                    <span>{{ app.session.get('staff_id') ? 'Staff' : 'Administrator' }}</span>
+                </div>
+            </div>
+
+        </header>
+
+        {# BURGER PAGE CONTENT #}
+        <section class="admin-content">
+
+            <div class="content-header">
+
+                <div>
+                    <span class="card-label">MENU MANAGEMENT</span>
+
+                    <p>
+                        Manage your burger menu, prices, stock, and availability.
+                    </p>
+                </div>
+
+                {# ORIGINAL BURGER ACTIONS #}
+                <div class="burger-header-actions">
+
+                    <a href="{{ path('admin_burger_add') }}"
+                       class="admin-button">
+                        <span>+</span>
+                        Add Burger
+                    </a>
+
+                    <a href="{{ path('admin_burger_restock') }}"
+                       class="admin-button restock-button">
+                        <span>↻</span>
+                        Restock Burger
+                    </a>
+
+                </div>
+
+            </div>
+
+            {# BURGER TABLE CARD #}
+            <div class="dashboard-card burger-management-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <span class="card-label">BURGER MANAGEMENT</span>
+                        <h2>All Burgers</h2>
+                    </div>
+
+                    <span>
+                        Total:
+                        <strong>{{ burgers|length }}</strong>
+                    </span>
+
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table class="admin-table">
+
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>BURGER</th>
+                                <th>CATEGORY</th>
+                                <th>PRICE</th>
+                                <th>STOCK</th>
+                                <th>STATUS</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                        {% for burger in burgers %}
+
+                            <tr>
+
+                                {# BURGER ID #}
+                                <td>
+                                    <strong class="order-id">
+                                        #{{ burger.id }}
+                                    </strong>
+                                </td>
+
+                                {# BURGER IMAGE AND DETAILS #}
+                                <td>
+                                    <div class="burger-table-info">
+
+                                        <div class="burger-table-image">
+
+                                            {% if burger.image is not empty %}
+                                                <img
+                                                    src="{{ asset('assets/' ~ burger.image) }}"
+                                                    alt="{{ burger.name }}"
+                                                    onerror="this.style.display='none';"
+                                                >
+                                            {% else %}
+                                                <span>🍔</span>
+                                            {% endif %}
+
+                                        </div>
+
+                                        <div class="burger-table-details">
+
+                                            <strong>{{ burger.name }}</strong>
+
+                                            <span>
+                                                {{ burger.description|default('')|slice(0, 55) }}{% if burger.description|default('')|length > 55 %}...{% endif %}
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+                                </td>
+
+                                {# CATEGORY #}
+                                <td>
+                                    <span class="category-badge">
+                                        {{ burger.category|default('') }}
+                                    </span>
+                                </td>
+
+                                {# PRICE #}
+                                <td>
+                                    <strong class="burger-price">
+                                        ₱{{ burger.price|number_format(2, '.', ',') }}
+                                    </strong>
+                                </td>
+
+                                {# STOCK #}
+                                <td>
+
+                                    {% set stock = burger.stock_quantity|default(0) %}
+
+                                    {% if stock <= 0 %}
+                                        {% set stock_class = 'stock-out' %}
+                                    {% elseif stock <= 10 %}
+                                        {% set stock_class = 'stock-low' %}
+                                    {% else %}
+                                        {% set stock_class = 'stock-good' %}
+                                    {% endif %}
+
+                                    <span class="stock-badge {{ stock_class }}">
+                                        {{ stock }}
+                                    </span>
+
+                                </td>
+
+                                {# AVAILABILITY #}
+                                <td>
+
+                                    {% if burger.available == 1 %}
+
+                                        <span class="status-badge status-available">
+                                            <span></span>
+                                            Available
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status-badge status-unavailable">
+                                            <span>●</span>
+                                            Unavailable
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                {# ORIGINAL EDIT AND DELETE ACTIONS #}
+                                <td>
+                                    <div class="table-actions">
+
+                                        <a
+                                            href="{{ path('admin_burger_edit', {'id': burger.id}) }}"
+                                            class="action-button edit-button"
+                                        >
+                                            Edit
+                                        </a>
+
+                                        <a
+                                            href="{{ path('admin_burger_delete', {'id': burger.id}) }}"
+                                            class="action-button delete-button"
+                                            onclick="return confirm('Are you sure you want to delete this burger?');"
+                                        >
+                                            Delete
+                                        </a>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        {% else %}
+
+                            {# EMPTY STATE #}
+                            <tr>
+                                <td colspan="7" class="empty-table">
+
+                                    <div class="empty-icon">🍔</div>
+
+                                    <h3>No Burgers Found</h3>
+
+                                    <p>
+                                        You haven't added any burgers yet.
+                                    </p>
+
+                                    <a
+                                        href="{{ path('admin_burger_add') }}"
+                                        class="admin-button"
+                                    >
+                                        Add Your First Burger
+                                    </a>
+
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        {# FOOTER #}
+        <footer class="admin-footer">
+            <span>© {{ 'now'|date('Y') }} Lawr's Burgers</span>
+            <span>Admin Panel</span>
+        </footer>
+
+    </main>
+
+</div>
+
+</body>
+</html>

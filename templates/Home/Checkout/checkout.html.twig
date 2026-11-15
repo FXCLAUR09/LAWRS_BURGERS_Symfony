@@ -1,0 +1,526 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Checkout | Lawr's Burgers{% endblock %}
+
+{% block body %}
+
+<main class="checkout-page">
+
+    <div class="checkout-container">
+
+        {% if order_success %}
+
+            <!-- ================= SUCCESS ================= -->
+
+            <div class="checkout-heading">
+
+                <p class="script">
+                    thank you
+                </p>
+
+                <h1>
+                    ORDER PLACED!
+                </h1>
+
+                <p>
+                    YOUR BURGER ORDER HAS BEEN RECEIVED.
+                </p>
+
+            </div>
+
+
+            <section class="checkout-card order-success-card">
+
+                <div class="checkout-card-heading">
+
+                    <span>✓</span>
+
+                    <h2>
+                        ORDER CONFIRMED
+                    </h2>
+
+                </div>
+
+
+                <div class="order-success-content">
+
+                    <h3>
+                        THANK YOU FOR ORDERING!
+                    </h3>
+
+                    <p>
+                        Your order has been successfully placed.
+                    </p>
+
+
+                    <div class="order-number">
+
+                        ORDER #{{ order_id }}
+
+                    </div>
+
+
+                    <p>
+                        Please keep your order number for reference.
+                    </p>
+
+
+                    <div class="success-actions">
+
+                        <a
+                            href="{{ path('home') }}"
+                            class="continue-btn"
+                        >
+                            BACK TO HOME
+                        </a>
+
+                        <a
+                            href="{{ path('menu') }}"
+                            class="back-cart-btn"
+                        >
+                            ORDER MORE
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+        {% else %}
+
+
+            <!-- ================= PAGE TITLE ================= -->
+
+            <div class="checkout-heading">
+
+                <p class="script">
+                    almost there
+                </p>
+
+                <h1>
+                    CHECKOUT
+                </h1>
+
+                <p>
+                    COMPLETE YOUR ORDER AND GET READY TO TASTE THE DIFFERENCE.
+                </p>
+
+            </div>
+
+
+            <!-- ================= ERROR MESSAGE ================= -->
+
+            {% if error is not empty %}
+
+                <div class="checkout-error">
+                    {{ error }}
+                </div>
+
+            {% endif %}
+
+
+            <div class="checkout-grid">
+
+
+                <!-- ================= CUSTOMER INFORMATION ================= -->
+
+                <section class="checkout-card">
+
+                    <div class="checkout-card-heading">
+
+                        <span>01</span>
+
+                        <h2>
+                            CUSTOMER INFORMATION
+                        </h2>
+
+                    </div>
+
+
+                    <form
+                        action="{{ path('checkout') }}"
+                        method="POST"
+                        class="checkout-form"
+                    >
+
+                        <!-- FULL NAME -->
+
+                        <label for="full_name">
+                            FULL NAME
+                        </label>
+
+                        <input
+                            type="text"
+                            id="full_name"
+                            name="full_name"
+                            placeholder="Enter your full name"
+                            value="{{ form.full_name|default(customer_name)|e }}"
+                            required
+                        >
+
+
+                        <!-- CONTACT NUMBER -->
+
+                        <label for="contact_number">
+                            CONTACT NUMBER
+                        </label>
+
+                        <input
+                            type="text"
+                            id="contact_number"
+                            name="contact_number"
+                            placeholder="09XXXXXXXXX"
+                            value="{{ form.contact_number|default('')|e }}"
+                            required
+                        >
+
+
+                        <!-- DELIVERY ADDRESS -->
+
+                        <label for="address">
+                            DELIVERY ADDRESS
+                        </label>
+
+                        <textarea
+                            id="address"
+                            name="address"
+                            placeholder="Enter your complete address"
+                            rows="5"
+                            required
+                        >{{ form.address|default('')|e }}</textarea>
+
+
+                        <!-- PAYMENT METHOD -->
+
+                        <label for="payment_method">
+                            PAYMENT METHOD
+                        </label>
+
+                        <select
+                            id="payment_method"
+                            name="payment_method"
+                            required
+                        >
+
+                            <option value="">
+                                SELECT PAYMENT METHOD
+                            </option>
+
+                            <option
+                                value="Cash on Delivery"
+                                {% if form.payment_method|default('') == 'Cash on Delivery' %}selected{% endif %}
+                            >
+                                CASH ON DELIVERY
+                            </option>
+
+                            <option
+                                value="GCash"
+                                {% if form.payment_method|default('') == 'GCash' %}selected{% endif %}
+                            >
+                                GCASH
+                            </option>
+
+                        </select>
+
+
+                        <!-- ================= GCASH REFERENCE ================= -->
+
+                        <div
+                            id="gcash-reference-group"
+                            class="gcash-reference-group"
+                            style="display: none; margin-top: 18px;"
+                        >
+
+                            <div
+                                class="gcash-reference-section"
+                                id="gcashReferenceSection"
+                            >
+
+                                <label for="gcash_reference">
+                                    GCASH ORDER REFERENCE
+                                </label>
+
+
+                                <div class="gcash-reference-box">
+
+                                    <input
+                                        type="text"
+                                        id="gcash_reference"
+                                        name="gcash_reference"
+                                        placeholder="Your reference will appear here"
+                                        value="{{ form.gcash_reference|default('')|e }}"
+                                        maxlength="100"
+                                        autocomplete="off"
+                                        readonly
+                                    >
+
+                                    <button
+                                        type="button"
+                                        id="copyGcashReference"
+                                        class="gcash-copy-btn"
+                                        aria-label="Copy GCash order reference"
+                                    >
+                                        COPY
+                                    </button>
+
+                                </div>
+
+
+                                <small class="gcash-reference-help">
+                                    Your unique website order reference is generated automatically.
+                                </small>
+
+
+                                <div class="gcash-payment-notice">
+
+                                    <span class="gcash-notice-icon">
+                                        ⓘ
+                                    </span>
+
+                                    <p>
+                                        This is your website order reference, not your official
+                                        GCash transaction reference. Your payment still needs
+                                        to be verified.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PLACE ORDER BUTTON -->
+
+                        <button
+                            type="submit"
+                            class="place-order-btn"
+                        >
+
+                            PLACE ORDER
+
+                            <span>→</span>
+
+                        </button>
+
+                    </form>
+
+                </section>
+
+
+
+                <!-- ================= ORDER SUMMARY ================= -->
+
+                <section class="checkout-card order-summary">
+                    <div id="gcashQrPanel" class="gcash-qr-panel" style="display: none;">
+
+                <h3>GCASH PAYMENT</h3>
+
+                <p>Scan this QR code using your GCash app to pay.</p>
+
+                <img
+                    src="{{ asset('assets/gcash-qr.jpg') }}"
+                    alt="Lawr's Burgers GCash QR Code"
+                    class="gcash-qr-image"
+                >
+
+                <small>
+                    Please make sure to complete your payment before submitting your order.
+                </small>
+
+            </div>
+
+                    <div class="checkout-card-heading">
+
+                        <span>02</span>
+
+                        <h2>
+                            YOUR ORDER
+                        </h2>
+
+                    </div>
+
+
+                    {% if cart|length > 0 %}
+
+                        <div class="checkout-items">
+
+                            {% for item in cart %}
+
+                                {% set name = item.name|default('Burger') %}
+                                {% set price = item.price|default(0) %}
+                                {% set quantity = item.quantity|default(1) %}
+                                {% set subtotal = price * quantity %}
+
+
+                                <div class="checkout-item">
+
+                                    <div class="checkout-item-info">
+
+                                        <h3>
+                                            {{ name }}
+                                        </h3>
+
+                                        <span>
+
+                                            ₱{{ price|number_format(2, '.', ',') }}
+
+                                            ×
+
+                                            {{ quantity }}
+
+                                        </span>
+
+                                    </div>
+
+
+                                    <strong>
+                                        ₱{{ subtotal|number_format(2, '.', ',') }}
+                                    </strong>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="checkout-total">
+
+                            <span>
+                                TOTAL
+                            </span>
+
+                            <strong>
+                                ₱{{ total|number_format(2, '.', ',') }}
+                            </strong>
+
+                        </div>
+
+
+                        <a
+                            href="{{ path('cart') }}"
+                            class="back-cart-btn"
+                        >
+                            ← EDIT CART
+                        </a>
+
+
+                    {% else %}
+
+
+                        <div class="checkout-empty">
+
+                            <h3>
+                                YOUR CART IS EMPTY
+                            </h3>
+
+                            <p>
+                                Add some delicious burgers before checking out.
+                            </p>
+
+                            <a
+                                href="{{ path('menu') }}"
+                                class="continue-btn"
+                            >
+                                BROWSE MENU
+                            </a>
+
+                        </div>
+
+
+                    {% endif %}
+
+                </section>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</main>
+
+
+<!-- ================= CHECKOUT JAVASCRIPT ================= -->
+
+<script>
+(function () {
+    let checkoutInitialized = false;
+
+    function initializeCheckoutPayment() {
+        const paymentMethod = document.getElementById("payment_method");
+        const referenceGroup = document.getElementById("gcash-reference-group");
+        const referenceInput = document.getElementById("gcash_reference");
+        const copyButton = document.getElementById("copyGcashReference");
+        const gcashQrPanel = document.getElementById("gcashQrPanel");
+
+        if (!paymentMethod || !referenceGroup || !referenceInput) {
+            return;
+        }
+
+        function syncPaymentDisplay() {
+            const isGcash = paymentMethod.value === "GCash";
+
+            referenceGroup.style.display = isGcash ? "block" : "none";
+            referenceInput.required = isGcash;
+
+            if (gcashQrPanel) {
+                gcashQrPanel.style.display = isGcash ? "block" : "none";
+            }
+
+            // Preserve the existing automatic reference generation.
+            if (isGcash && !referenceInput.value.trim()) {
+                const randomPart = Array.from(
+                    crypto.getRandomValues(new Uint8Array(5)),
+                    byte => byte.toString(16).padStart(2, "0")
+                ).join("").toUpperCase();
+
+                referenceInput.value = "LWB-GCASH-" + randomPart;
+            }
+        }
+
+        if (!checkoutInitialized) {
+            paymentMethod.addEventListener("change", syncPaymentDisplay);
+
+            if (copyButton) {
+                copyButton.addEventListener("click", async function () {
+                    if (!referenceInput.value) return;
+
+                    try {
+                        await navigator.clipboard.writeText(referenceInput.value);
+                        copyButton.textContent = "COPIED!";
+                    } catch (error) {
+                        referenceInput.select();
+                        const copied = document.execCommand("copy");
+                        copyButton.textContent = copied ? "COPIED!" : "SELECTED";
+                    }
+
+                    window.setTimeout(function () {
+                        copyButton.textContent = "COPY";
+                    }, 1500);
+                });
+            }
+
+            checkoutInitialized = true;
+        }
+
+        // Run on initial load and again when the browser restores the page
+        // from its back-forward cache, without requiring a hard refresh.
+        syncPaymentDisplay();
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initializeCheckoutPayment, { once: true });
+    } else {
+        initializeCheckoutPayment();
+    }
+
+    window.addEventListener("pageshow", initializeCheckoutPayment);
+})();
+</script>
+
+{% endblock %}

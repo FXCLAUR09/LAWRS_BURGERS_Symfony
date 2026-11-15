@@ -1,0 +1,470 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}History | Lawr's Burgers Admin{% endblock %}
+
+{% block body %}
+
+<div class="admin-layout">
+
+    {# SHARED SIDEBAR #}
+    {% include 'Admin/sidebar.html.twig' ignore missing %}
+
+    <main class="admin-main">
+
+        {# TOPBAR #}
+        <header class="admin-topbar">
+
+            <div>
+                <div class="breadcrumb">
+                    ADMIN / HISTORY
+                </div>
+
+                <h1>Order History</h1>
+            </div>
+
+            <div class="admin-user">
+
+                <div class="user-avatar">
+                    {{ admin_username|slice(0, 1)|upper }}
+                </div>
+
+                <div class="user-info">
+                    <strong>{{ admin_username }}</strong>
+                    <span>Administrator</span>
+                </div>
+
+            </div>
+
+        </header>
+
+        {# PAGE CONTENT #}
+        <section class="admin-content history-admin-content">
+
+            {# PAGE HEADER #}
+            <div class="history-page-header">
+
+                <div class="history-page-title">
+
+                    <span class="history-eyebrow">
+                        ORDER RECORDS
+                    </span>
+
+                    <h2>Order History</h2>
+
+                    <p>
+                        Review completed and cancelled orders from your store.
+                    </p>
+
+                </div>
+
+            </div>
+
+            {# FLASH MESSAGES #}
+            {% for message in app.flashes('success') %}
+                <div class="admin-alert admin-alert-success">
+                    <span class="alert-icon">✓</span>
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('error') %}
+                <div class="admin-alert admin-alert-error">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            {# HISTORY SUMMARY #}
+            <div class="history-summary-grid">
+
+                {# TOTAL HISTORY #}
+                <div class="history-summary-card">
+
+                    <div class="history-summary-icon history-icon-total">
+                        🕘
+                    </div>
+
+                    <div>
+                        <span>TOTAL HISTORY</span>
+
+                        <strong>{{ total_history }}</strong>
+
+                        <small>Recorded orders</small>
+                    </div>
+
+                </div>
+
+                {# COMPLETED #}
+                <div class="history-summary-card">
+
+                    <div class="history-summary-icon history-icon-completed">
+                        ✓
+                    </div>
+
+                    <div>
+                        <span>COMPLETED</span>
+
+                        <strong>{{ completed_count }}</strong>
+
+                        <small>Finished orders</small>
+                    </div>
+
+                </div>
+
+                {# CANCELLED #}
+                <div class="history-summary-card">
+
+                    <div class="history-summary-icon history-icon-cancelled">
+                        ×
+                    </div>
+
+                    <div>
+                        <span>CANCELLED</span>
+
+                        <strong>{{ cancelled_count }}</strong>
+
+                        <small>Cancelled orders</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+            {# SEARCH AND FILTER #}
+            <div class="history-filter-card">
+
+                <form
+                    method="GET"
+                    action="{{ path('admin_history') }}"
+                    class="history-filter-form"
+                >
+
+                    {# SEARCH #}
+                    <div class="history-filter-group history-search-group">
+
+                        <label for="historySearch">
+                            Search History
+                        </label>
+
+                        <div class="history-search-wrapper">
+
+                            <span class="history-search-icon">
+                                🔎
+                            </span>
+
+                            <input
+                                type="text"
+                                id="historySearch"
+                                name="search"
+                                value="{{ search }}"
+                                placeholder="Search order number, customer, or phone..."
+                            >
+
+                        </div>
+
+                    </div>
+
+                    {# STATUS FILTER #}
+                    <div class="history-filter-group history-status-group">
+
+                        <label for="historyStatus">
+                            Status
+                        </label>
+
+                        <select id="historyStatus" name="status">
+
+                            <option
+                                value="All"
+                                {% if filter_status == 'All' %}selected{% endif %}
+                            >
+                                All History
+                            </option>
+
+                            <option
+                                value="Completed"
+                                {% if filter_status == 'Completed' %}selected{% endif %}
+                            >
+                                Completed
+                            </option>
+
+                            <option
+                                value="Cancelled"
+                                {% if filter_status == 'Cancelled' %}selected{% endif %}
+                            >
+                                Cancelled
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    {# SEARCH BUTTON #}
+                    <button
+                        type="submit"
+                        class="history-filter-button"
+                    >
+                        Search
+                    </button>
+
+                    {# CLEAR BUTTON #}
+                    {% if search != '' or filter_status != 'All' %}
+
+                        <a
+                            href="{{ path('admin_history') }}"
+                            class="history-clear-button"
+                        >
+                            Clear
+                        </a>
+
+                    {% endif %}
+
+                </form>
+
+            </div>
+
+            {# HISTORY TABLE #}
+            <div class="admin-card history-table-card">
+
+                {# TABLE HEADER #}
+                <div class="history-table-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            ARCHIVE
+                        </span>
+
+                        <h3>Historical Orders</h3>
+
+                        <p>
+                            Completed and cancelled orders are kept here for reference.
+                        </p>
+
+                    </div>
+
+                    <div class="history-record-count">
+
+                        {{ total_history }}
+
+                        {{ total_history == 1 ? 'record' : 'records' }}
+
+                    </div>
+
+                </div>
+
+                {# TABLE #}
+                <div class="table-wrapper history-table-wrapper">
+
+                    <table class="admin-table history-table">
+
+                        <thead>
+
+                            <tr>
+                                <th>ORDER</th>
+                                <th>CUSTOMER</th>
+                                <th>PAYMENT</th>
+                                <th>TOTAL</th>
+                                <th>STATUS</th>
+                                <th>DATE</th>
+                                <th>ACTION</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for history_order in history_orders %}
+
+                                {% set status = history_order.status|default('')|lower|trim %}
+
+                                {% set payment_status = history_order.payment_status|default('Unpaid') %}
+
+                                {% set status_class = 'history-status-default' %}
+
+                                {% if status == 'completed' %}
+                                    {% set status_class = 'history-status-completed' %}
+                                {% elseif status == 'cancelled' or status == 'canceled' %}
+                                    {% set status_class = 'history-status-cancelled' %}
+                                {% endif %}
+
+                                {% set payment_class = 'history-payment-default' %}
+
+                                {% if payment_status|lower|trim == 'paid' %}
+                                    {% set payment_class = 'history-payment-paid' %}
+                                {% elseif payment_status|lower|trim == 'pending verification' %}
+                                    {% set payment_class = 'history-payment-pending' %}
+                                {% elseif payment_status|lower|trim == 'unpaid' %}
+                                    {% set payment_class = 'history-payment-unpaid' %}
+                                {% endif %}
+
+                                <tr>
+
+                                    {# ORDER NUMBER #}
+                                    <td>
+
+                                        <strong class="history-order-id">
+                                            #{{ history_order.id }}
+                                        </strong>
+
+                                    </td>
+
+                                    {# CUSTOMER #}
+                                    <td>
+
+                                        <div class="history-customer">
+
+                                            <strong>
+                                                {{ history_order.customer_name|default('Unknown customer') }}
+                                            </strong>
+
+                                            <span>
+                                                {{ history_order.phone|default('N/A') }}
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+
+                                    {# PAYMENT #}
+                                    <td>
+
+                                        <div class="history-payment-cell">
+
+                                            <strong>
+                                                {{ history_order.payment_method|default('N/A') }}
+                                            </strong>
+
+                                            <span class="history-payment-badge {{ payment_class }}">
+                                                {{ payment_status }}
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+
+                                    {# TOTAL #}
+                                    <td>
+
+                                        <strong class="history-total">
+                                            ₱{{ history_order.total|default(0)|number_format(2, '.', ',') }}
+                                        </strong>
+
+                                    </td>
+
+                                    {# STATUS #}
+                                    <td>
+
+                                        <span class="history-status-badge {{ status_class }}">
+                                            {{ history_order.status }}
+                                        </span>
+
+                                    </td>
+
+                                    {# DATE #}
+                                    <td>
+
+                                        <div class="history-date">
+
+                                            {% if history_order.created_at %}
+
+                                                <strong>
+                                                    {{ history_order.created_at|date('M d, Y') }}
+                                                </strong>
+
+                                                <span>
+                                                    {{ history_order.created_at|date('h:i A') }}
+                                                </span>
+
+                                            {% else %}
+
+                                                <span>—</span>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                    </td>
+
+                                    {# ACTION #}
+                                    <td>
+
+                                        <a
+                                            href="{{ path('admin_order_view', {id: history_order.id}) }}"
+                                            class="history-view-button"
+                                        >
+                                            View
+                                            <span>→</span>
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            {% else %}
+
+                                {# EMPTY STATE #}
+                                <tr>
+
+                                    <td colspan="7" class="history-empty-cell">
+
+                                        <div class="history-empty-state">
+
+                                            <div class="history-empty-icon">
+                                                🕘
+                                            </div>
+
+                                            <h3>No Order History</h3>
+
+                                            {% if search != '' or filter_status != 'All' %}
+
+                                                <p>
+                                                    No completed or cancelled orders matched your search.
+                                                </p>
+
+                                                <a
+                                                    href="{{ path('admin_history') }}"
+                                                    class="history-empty-button"
+                                                >
+                                                    View All History
+                                                </a>
+
+                                            {% else %}
+
+                                                <p>
+                                                    Completed and cancelled orders will appear here.
+                                                </p>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        {# FOOTER #}
+        <footer class="admin-footer">
+
+            <p>
+                © {{ 'now'|date('Y') }} Lawr's Burgers. Admin Panel.
+            </p>
+
+        </footer>
+
+    </main>
+
+</div>
+
+{% endblock %}

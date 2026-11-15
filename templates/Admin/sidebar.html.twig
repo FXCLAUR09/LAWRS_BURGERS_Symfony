@@ -1,0 +1,26 @@
+<aside class="admin-sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-main">LAWR'S</div><div class="brand-sub">BURGERS</div>
+        <div class="sidebar-admin-label">{{ app.session.get('staff_id') ? 'STAFF PANEL' : 'ADMIN PANEL' }}</div>
+    </div>
+    <nav class="admin-nav">
+        {% if app.session.get('staff_id') %}
+            <a href="{{ path('staff_dashboard') }}" class="nav-item"><span class="nav-icon">▣</span><span>Dashboard</span></a>
+        {% else %}
+            <a href="{{ path('admin_dashboard') }}" class="nav-item {{ app.request.attributes.get('_route') == 'admin_dashboard' ? 'active' : '' }}"><span class="nav-icon">▣</span><span>Dashboard</span></a>
+        {% endif %}
+        <a href="{{ path('admin_burgers') }}" class="nav-item {{ app.request.attributes.get('_route') starts with 'admin_burger' or app.request.attributes.get('_route') == 'admin_burgers' ? 'active' : '' }}"><span class="nav-icon">🍔</span><span>Burgers</span></a>
+        <a href="{{ path('admin_orders') }}" class="nav-item {{ app.request.attributes.get('_route') starts with 'admin_order' ? 'active' : '' }}"><span class="nav-icon">🛒</span><span>Orders</span></a>
+        {% if app.session.get('staff_id') %}
+            <a href="{{ path('staff_reviews') }}" class="nav-item"><span class="nav-icon">⭐</span><span>Reviews</span></a>
+        {% else %}
+            <a href="{{ path('admin_history') }}" class="nav-item"><span class="nav-icon">🕘</span><span>History</span></a>
+            <a href="{{ path('admin_reports') }}" class="nav-item"><span class="nav-icon">📊</span><span>Reports</span></a>
+            <a href="{{ path('admin_users_index') }}" class="nav-item {{ app.request.attributes.get('_route') starts with 'admin_users_' ? 'active' : '' }}"><span class="nav-icon">👥</span><span>User Management</span></a>
+        {% endif %}
+        <div class="nav-divider"></div>
+        <a href="{{ path('home') }}" class="nav-item" target="_blank"><span class="nav-icon">↗</span><span>View Website</span></a>
+        <a href="{{ path('app_logout') }}" class="nav-item logout-link"><span class="nav-icon">⇥</span><span>Logout</span></a>
+    </nav>
+    <div class="sidebar-footer"><p>Lawr's Burgers</p><span>{{ app.session.get('staff_id') ? 'Staff Operations Panel' : 'Admin Management System' }}</span></div>
+</aside>

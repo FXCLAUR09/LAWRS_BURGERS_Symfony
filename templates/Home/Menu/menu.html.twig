@@ -1,0 +1,181 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Our Menu | Lawr's Burgers{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <!-- GOOGLE FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Pacifico&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- MAIN CSS -->
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script src="{{ asset('js/script.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+
+    <!-- =====================================================
+         MENU
+         ===================================================== -->
+
+    <main class="menu-page">
+
+        <div class="menu-container">
+
+
+            <!-- =================================================
+                 PAGE INTRO
+                 ================================================= -->
+
+            <div class="menu-heading">
+
+                <p class="script">
+                    fresh from the grill
+                </p>
+
+                <h1>
+                    LAWR'S BURGER MENU
+                </h1>
+
+                <p>
+                    BIG FLAVOR. JUICY BURGERS. MADE JUST FOR YOU.
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 BURGER GRID
+                 ================================================= -->
+
+            <div class="menu-grid">
+
+                {% if burgers|length > 0 %}
+
+                    {% for burger in burgers %}
+
+                        <article class="menu-card">
+
+
+                            <!-- IMAGE -->
+
+                            <div class="menu-image">
+
+                                <img
+                                    src="{{ asset('assets/' ~ burger.image) }}"
+                                    alt="{{ burger.name }}"
+                                >
+
+                            </div>
+
+
+                            <!-- INFORMATION -->
+
+                            <div class="menu-info">
+
+                                {% if burger.category is not empty %}
+
+                                    <span class="menu-category">
+                                        {{ burger.category }}
+                                    </span>
+
+                                {% endif %}
+
+
+                                <h2>
+                                    {{ burger.name }}
+                                </h2>
+
+
+                                <p>
+                                    {{ burger.description }}
+                                </p>
+
+
+                                <!-- PRICE + CART -->
+
+                                <div class="menu-bottom">
+
+                                    <span class="menu-price">
+                                        ₱{{ burger.price|number_format(2, '.', ',') }}
+                                    </span>
+
+
+                                    <!-- ADD TO CART -->
+
+                                    <form
+                                    action="{{ path('cart_add') }}"
+                                    method="POST"
+                                    >
+
+                                        <input
+                                            type="hidden"
+                                            name="burger_id"
+                                            value="{{ burger.id }}"
+                                        >
+
+                                        <button type="submit" class="add-cart-btn">
+
+                                            ADD TO CART
+
+                                            <span>+</span>
+
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    {% endfor %}
+
+                {% else %}
+
+
+                    <!-- =================================================
+                         EMPTY MENU
+                         ================================================= -->
+
+                    <div class="menu-empty">
+
+                        <h2>
+                            NO BURGERS AVAILABLE
+                        </h2>
+
+                        <p>
+                            Please check back again soon.
+                        </p>
+
+                    </div>
+
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </main>
+
+{% endblock %}

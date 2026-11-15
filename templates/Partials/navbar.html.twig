@@ -1,0 +1,161 @@
+
+<header class="site-header" id="siteHeader">
+
+    <a class="brand" href="{{ path('home') }}" aria-label="Lawr's Burgers home">
+        <span class="brand-main">LAWR’S</span>
+        <span class="brand-sub">BURGERS</span>
+    </a>
+
+    <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <nav class="main-nav" aria-label="Primary navigation">
+
+        <a href="{{ path('home') }}" class="{{ app.request.attributes.get('_route') == 'home' ? 'active' : '' }}">HOME</a>
+        <a href="{{ path('menu') }}" class="{{ app.request.attributes.get('_route') == 'menu' ? 'active' : '' }}">OUR MENU</a>
+        <a href="{{ path('about') }}" class="{{ app.request.attributes.get('_route') == 'about' ? 'active' : '' }}">ABOUT US</a>
+        <a href="{{ path('reviews') }}" class="{{ app.request.attributes.get('_route') == 'reviews' ? 'active' : '' }}">REVIEWS</a>
+        <a href="{{ path('cart') }}" class="{{ app.request.attributes.get('_route') == 'cart' ? 'active' : '' }}">VIEW CART</a>
+
+        {% if app.session.get('customer_id') %}
+
+            <div class="user-menu">
+
+                <button type="button" class="user-menu-button" aria-expanded="false">
+                    <span class="user-icon">👤</span>
+                    <span class="user-name">{{ app.session.get('customer_name')|default('Customer') }}</span>
+                    <span class="user-arrow">▾</span>
+                </button>
+
+                <div class="user-dropdown">
+
+                    {# CUSTOMER PROFILE HEADER #}
+                    <div class="user-dropdown-header">
+
+                        <span class="user-dropdown-icon">👤</span>
+
+                        <div>
+                            <strong>{{ app.session.get('customer_name')|default('Customer') }}</strong>
+                            <small>{{ app.session.get('customer_email')|default('') }}</small>
+                        </div>
+
+                    </div>
+
+                    <div class="user-dropdown-divider"></div>
+
+                    {# CUSTOMER ORDER NOTIFICATIONS #}
+                    <div class="customer-notifications" id="customerNotifications"
+                         data-notifications-url="{{ path('customer_notifications') }}">
+
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">
+                            <strong style="font-size:12px;letter-spacing:.04em;">ORDER NOTIFICATIONS</strong>
+                            <span id="notificationNewCount" style="font-size:11px;color:#d93636;font-weight:700;"></span>
+                        </div>
+
+                        <div id="notificationList">
+                            <p style="margin:0;padding:8px 0;font-size:12px;opacity:.7;">
+                                Loading notifications...
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="user-dropdown-divider"></div>
+
+                    <a href="#" class="profile-open-btn">
+                        <span>👤</span>
+                        My Profile
+                    </a>
+
+                    <a href="{{ path('cart') }}">
+                        <span>📦</span>
+                        My Orders
+                    </a>
+
+                    <a href="{{ path('app_logout') }}" class="logout-link">
+                        <span>↪</span>
+                        Logout
+                    </a>
+
+                </div>
+
+            </div>
+
+        {% else %}
+
+            <a href="{{ path('app_login') }}" class="user-login-link">
+                <span class="user-login-icon">👤</span>
+                <span>LOGIN</span>
+            </a>
+
+        {% endif %}
+
+    </nav>
+
+</header>
+
+{# CUSTOMER PROFILE MODAL #}
+{% if app.session.get('customer_id') %}
+
+    <div class="profile-modal" id="profileModal" aria-hidden="true">
+
+        <div class="profile-modal-overlay"></div>
+
+        <div class="profile-modal-box" role="dialog" aria-modal="true"
+             aria-labelledby="profileModalTitle">
+
+            <button type="button" class="profile-modal-close"
+                    id="profileModalClose" aria-label="Close profile">
+                &times;
+            </button>
+
+            <div class="profile-modal-header">
+
+                <div class="profile-avatar">👤</div>
+
+                <div class="profile-title">
+                    <p class="profile-label">MY ACCOUNT</p>
+                    <h2 id="profileModalTitle">{{ app.session.get('customer_name') }}</h2>
+                    <p class="profile-email">{{ app.session.get('customer_email') }}</p>
+                </div>
+
+            </div>
+
+            <div class="profile-modal-divider"></div>
+
+            <div class="profile-information">
+
+                <h3>PROFILE INFORMATION</h3>
+
+                <div class="profile-info-item">
+                    <span class="profile-info-label">FULL NAME</span>
+                    <span class="profile-info-value">{{ app.session.get('customer_name') }}</span>
+                </div>
+
+                <div class="profile-info-item">
+                    <span class="profile-info-label">EMAIL ADDRESS</span>
+                    <span class="profile-info-value">{{ app.session.get('customer_email') }}</span>
+                </div>
+
+            </div>
+
+            <div class="profile-modal-actions">
+
+                <a href="{{ path('profile_edit') }}" class="profile-edit-btn">
+                    EDIT PROFILE
+                </a>
+
+                <a href="{{ path('cart') }}" class="profile-orders-btn">
+                    VIEW MY ORDERS
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endif %}

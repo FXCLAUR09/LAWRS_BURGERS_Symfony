@@ -1,0 +1,704 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Reports | Lawr's Burgers Admin{% endblock %}
+
+{% block body %}
+
+<div class="admin-layout">
+
+    {# SHARED SIDEBAR #}
+    {% include 'Admin/sidebar.html.twig' ignore missing %}
+
+    <main class="admin-main">
+
+        {# TOPBAR #}
+        <header class="admin-topbar">
+
+            <div>
+
+                <div class="breadcrumb">
+                    ADMIN / REPORTS
+                </div>
+
+                <h1>Reports</h1>
+
+            </div>
+
+            <div class="admin-user">
+
+                <div class="user-avatar">
+                    {{ admin_username|slice(0, 1)|upper }}
+                </div>
+
+                <div class="user-info">
+
+                    <strong>{{ admin_username }}</strong>
+
+                    <span>Administrator</span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        {# MAIN CONTENT #}
+        <section class="admin-content reports-page">
+
+
+            {# =====================================================
+               PAGE HEADER
+            ====================================================== #}
+
+            <div class="content-header">
+
+                <div>
+
+                    <h2>
+                        Business Reports
+                    </h2>
+
+                    <p>
+                        Monitor sales, orders, burger performance, and inventory.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {# =====================================================
+               SUMMARY CARDS
+            ====================================================== #}
+
+            <div class="stats-grid">
+
+
+                {# TOTAL SALES #}
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        💰
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>
+                            Total Sales
+                        </span>
+
+                        <strong>
+                            ₱{{ total_sales|number_format(2, '.', ',') }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                {# TOTAL ORDERS #}
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        📦
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>
+                            Total Orders
+                        </span>
+
+                        <strong>
+                            {{ total_orders|number_format }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                {# COMPLETED #}
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ✅
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>
+                            Completed
+                        </span>
+
+                        <strong>
+                            {{ completed_orders|number_format }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                {# ACTIVE ORDERS #}
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        🔄
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>
+                            Active Orders
+                        </span>
+
+                        <strong>
+                            {{ active_orders|number_format }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                {# CANCELLED #}
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ❌
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>
+                            Cancelled
+                        </span>
+
+                        <strong>
+                            {{ cancelled_orders|number_format }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                {# LOW STOCK #}
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ⚠️
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>
+                            Low Stock
+                        </span>
+
+                        <strong>
+                            {{ low_stock|number_format }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            {# =====================================================
+               BEST-SELLING BURGERS
+            ====================================================== #}
+
+            <div class="admin-card report-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            🍔 Best-Selling Burgers
+                        </h3>
+
+                        <p>
+                            Top burgers based on quantity sold.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table class="admin-table report-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Rank</th>
+
+                                <th>Burger</th>
+
+                                <th>Quantity Sold</th>
+
+                                <th>Sales</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for burger in best_sellers %}
+
+                                <tr>
+
+                                    <td>
+
+                                        <span class="report-rank">
+                                            #{{ loop.index }}
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <strong>
+                                            {{ burger.burger_name }}
+                                        </strong>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="quantity-badge">
+                                            {{ burger.total_quantity|number_format }}
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <strong class="report-price">
+                                            ₱{{ burger.total_sales|number_format(2, '.', ',') }}
+                                        </strong>
+
+                                    </td>
+
+                                </tr>
+
+                            {% else %}
+
+                                <tr>
+
+                                    <td colspan="4" class="empty-table">
+
+                                        <div class="empty-icon">
+                                            🍔
+                                        </div>
+
+                                        <h3>
+                                            No Sales Yet
+                                        </h3>
+
+                                        <p>
+                                            Burger sales will appear here after customers place orders.
+                                        </p>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            {# =====================================================
+               DAILY + MONTHLY SALES
+            ====================================================== #}
+
+            <div class="report-two-column">
+
+
+                {# DAILY SALES #}
+
+                <div class="admin-card report-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                📅 Recent Daily Sales
+                            </h3>
+
+                            <p>
+                                Sales from the latest 7 days with orders.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table class="admin-table report-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Date</th>
+
+                                    <th>Orders</th>
+
+                                    <th>Sales</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                {% for day in daily_sales %}
+
+                                    <tr>
+
+                                        <td>
+
+                                            {{ day.sale_date|date('M d, Y') }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {{ day.order_count|number_format }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <strong class="report-price">
+                                                ₱{{ day.daily_sales|number_format(2, '.', ',') }}
+                                            </strong>
+
+                                        </td>
+
+                                    </tr>
+
+                                {% else %}
+
+                                    <tr>
+
+                                        <td colspan="3" class="empty-table">
+                                            No sales data yet.
+                                        </td>
+
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                {# MONTHLY SALES #}
+
+                <div class="admin-card report-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                📈 Monthly Sales
+                            </h3>
+
+                            <p>
+                                Sales summary for recent months.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table class="admin-table report-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Month</th>
+
+                                    <th>Orders</th>
+
+                                    <th>Sales</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                {% for month in monthly_sales %}
+
+                                    <tr>
+
+                                        <td>
+
+                                            {{ (month.sale_month ~ '-01')|date('F Y') }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {{ month.order_count|number_format }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <strong class="report-price">
+                                                ₱{{ month.monthly_sales|number_format(2, '.', ',') }}
+                                            </strong>
+
+                                        </td>
+
+                                    </tr>
+
+                                {% else %}
+
+                                    <tr>
+
+                                        <td colspan="3" class="empty-table">
+                                            No monthly data yet.
+                                        </td>
+
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            {# =====================================================
+               BURGER STOCK REPORT
+            ====================================================== #}
+
+            <div class="admin-card report-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            📦 Burger Stock Report
+                        </h3>
+
+                        <p>
+                            Current inventory levels for all burgers.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table class="admin-table report-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Burger</th>
+
+                                <th>Category</th>
+
+                                <th>Stock</th>
+
+                                <th>Availability</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for stock in stock_report %}
+
+                                {% set stock_quantity = stock.stock_quantity|default(0) %}
+
+                                <tr>
+
+
+                                    {# BURGER #}
+
+                                    <td>
+
+                                        <strong>
+                                            {{ stock.name }}
+                                        </strong>
+
+                                    </td>
+
+
+                                    {# CATEGORY #}
+
+                                    <td>
+
+                                        <span class="category-badge">
+                                            {{ stock.category }}
+                                        </span>
+
+                                    </td>
+
+
+                                    {# STOCK #}
+
+                                    <td>
+
+                                        {% if stock_quantity <= 10 %}
+
+                                            <span class="stock-badge low-stock">
+
+                                                {{ stock_quantity }} left
+
+                                            </span>
+
+                                        {% elseif stock_quantity <= 25 %}
+
+                                            <span class="stock-badge medium-stock">
+
+                                                {{ stock_quantity }} left
+
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="stock-badge good-stock">
+
+                                                {{ stock_quantity }} left
+
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    {# AVAILABILITY #}
+
+                                    <td>
+
+                                        {% if stock.available == 1 %}
+
+                                            <span class="status-badge status-available">
+                                                Available
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="status-badge status-unavailable">
+                                                Unavailable
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                </tr>
+
+                            {% else %}
+
+                                <tr>
+
+                                    <td colspan="4" class="empty-table">
+                                        No burgers found.
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        {# =====================================================
+           FOOTER
+        ====================================================== #}
+
+        <footer class="admin-footer">
+
+            <p>
+                © {{ 'now'|date('Y') }} Lawr's Burgers. Admin Panel.
+            </p>
+
+        </footer>
+
+
+    </main>
+
+</div>
+
+{% endblock %}

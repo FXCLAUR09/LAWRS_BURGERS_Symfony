@@ -1,25 +1,53 @@
 
 services:
-###> doctrine/doctrine-bundle ###
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lawrs_burgers_app
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+    command: php -S 0.0.0.0:8000 -t public
+
   database:
-    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    image: mariadb:10.11
+    container_name: lawrs_burgers_database
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
-      POSTGRES_USER: ${POSTGRES_USER:-app}
+      MARIADB_DATABASE: lawrs_burgers
+      MARIADB_USER: lawrs_user
+      MARIADB_PASSWORD: lawrs_password
+      MARIADB_ROOT_PASSWORD: lawrs_root_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - lawrs_database_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 60s
-    volumes:
-      - database_data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
+      start_period: 30s
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: lawrs_burgers_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      PMA_HOST: database
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
+    ports:
+      - "8081:80"
 
 volumes:
-###> doctrine/doctrine-bundle ###
-  database_data:
-###< doctrine/doctrine-bundle ###
+  lawrs_database_data:

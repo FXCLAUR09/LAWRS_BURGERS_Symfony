@@ -1,0 +1,22 @@
+{% extends 'Admin/base.html.twig' %}
+{% block title %}Reviews | Staff Panel{% endblock %}
+{% block body %}
+<div class="admin-layout">
+    {% include 'Staff/sidebar.html.twig' %}
+    <main class="admin-main">
+        <header class="admin-topbar"><div><div class="breadcrumb">STAFF / REVIEWS</div><h1>Customer Reviews</h1></div><div class="admin-user"><div class="user-avatar">{{ staff_name|slice(0,1)|upper }}</div><div class="user-info"><strong>{{ staff_name }}</strong><span>Staff</span></div></div></header>
+        <section class="admin-content">
+            {% for message in app.flashes('success') %}<div class="admin-alert admin-alert-success">✓ {{ message }}</div>{% endfor %}
+            {% for message in app.flashes('error') %}<div class="admin-alert admin-alert-error">{{ message }}</div>{% endfor %}
+            <div class="stats-grid"><div class="admin-card stat-card"><span>Total Reviews</span><strong>{{ total_reviews }}</strong></div><div class="admin-card stat-card"><span>Average Rating</span><strong>{{ average_rating|number_format(1) }} / 5</strong></div></div>
+            <div class="admin-card"><div class="card-header"><div><h3>All Customer Reviews</h3><p>View and moderate reviews submitted through the website.</p></div></div>
+                <div class="table-wrapper"><table class="admin-table"><thead><tr><th>Customer</th><th>Rating</th><th>Review</th><th>Date</th><th>Action</th></tr></thead><tbody>
+                {% for review in reviews %}
+                    <tr><td><strong>{{ review.customer_name }}</strong></td><td>{% for star in 1..5 %}{{ star <= review.rating ? '★' : '☆' }}{% endfor %}</td><td>{{ review.review_text }}</td><td>{{ review.created_at|date('M d, Y h:i A') }}</td><td></td></tr>
+                {% else %}<tr><td colspan="5">No customer reviews have been submitted yet.</td></tr>{% endfor %}
+                </tbody></table></div>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

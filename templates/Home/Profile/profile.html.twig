@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block body %}
+{% if app.session.get('customer_id') %}
+
+<div class="profile-modal" id="profileModal" aria-hidden="true">
+    <div class="profile-modal-overlay"></div>
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+
+    <div class="profile-modal-box" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+
+        <button type="button" class="profile-modal-close" id="profileModalClose">
+            &times;
+        </button>
+
+        <div class="profile-modal-header">
+            <div class="profile-avatar">👤</div>
+
+            <div class="profile-title">
+                <p class="profile-label">MY ACCOUNT</p>
+                <h2>{{ app.session.get('customer_name') }}</h2>
+                <p class="profile-email">
+                    {{ app.session.get('customer_email') }}
+                </p>
+            </div>
+        </div>
+
+        <div class="profile-modal-divider"></div>
+
+        <div class="profile-information">
+            <h3>PROFILE INFORMATION</h3>
+
+            <div class="profile-info-item">
+                <span class="profile-info-label">FULL NAME</span>
+                <span class="profile-info-value">
+                    {{ app.session.get('customer_name') }}
+                </span>
+            </div>
+
+            <div class="profile-info-item">
+                <span class="profile-info-label">EMAIL ADDRESS</span>
+                <span class="profile-info-value">
+                    {{ app.session.get('customer_email') }}
+                </span>
+            </div>
+        </div>
+
+        <div class="profile-modal-actions">
+            <a href="{{ path('profile_edit') }}" class="profile-edit-btn">
+                EDIT PROFILE
+            </a>
+
+            <a href="{{ path('cart') }}" class="profile-orders-btn">
+                VIEW MY ORDERS
+            </a>
+        </div>
+
+    </div>
+</div>
+
+{% endif %}
+{% endblock %}

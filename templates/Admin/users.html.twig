@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | Lawr's Burgers</title>
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        .um-wrap{display:grid;gap:22px}.um-panel{background:#fff;border:1px solid #eee3d7;border-radius:16px;padding:24px;box-shadow:0 8px 24px #32170d0a}.um-head{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}.um-head h2{margin:3px 0 5px;font-size:25px;color:#251713}.um-muted{color:#81746b;font-size:13px}.um-kicker{font-size:11px;font-weight:800;letter-spacing:1.5px;color:#d97916}.um-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}.um-field{display:grid;gap:7px}.um-field label{font-size:12px;font-weight:800;color:#51433a}.um-field input,.um-field select,.um-search input{width:100%;box-sizing:border-box;border:1px solid #e7ddd2;border-radius:9px;padding:12px;background:#fff;color:#2b211c}.um-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.um-btn{border:0;border-radius:9px;padding:10px 15px;background:#f28a18;color:#21150d;font-weight:800;text-decoration:none;cursor:pointer;display:inline-block}.um-btn.dark{background:#641c1c;color:#fff}.um-btn.light{background:#f4eee7;color:#4a3025}.um-btn.danger{background:#a52b25;color:#fff}.um-search{display:flex;gap:8px;max-width:440px}.um-search input{min-width:190px}.um-table-wrap{overflow-x:auto;margin-top:16px}.um-table{width:100%;border-collapse:collapse;min-width:650px}.um-table th,.um-table td{text-align:left;padding:13px 12px;border-bottom:1px solid #f0e9e2;font-size:13px}.um-table th{color:#806e60;font-size:10px;letter-spacing:1px;text-transform:uppercase}.um-table td strong{color:#30221b}.um-pill{display:inline-block;border-radius:30px;padding:5px 9px;font-size:10px;font-weight:800;background:#f4eee7;color:#68432e}.um-pill.active{background:#e8f4e9;color:#28743b}.um-pill.inactive{background:#fbe9e7;color:#a32c24}.um-flash{padding:12px 15px;border-radius:9px;font-size:13px;font-weight:700}.um-flash.success{background:#e9f5e9;color:#246b34}.um-flash.error{background:#fff0ed;color:#a12b20}.um-empty{padding:22px;text-align:center;color:#88796d}.um-count{font-size:12px;color:#78685e;background:#f7f1e9;border-radius:30px;padding:8px 12px}.um-note{font-size:12px;color:#82756b;margin-top:12px;line-height:1.5}@media(max-width:700px){.um-grid{grid-template-columns:1fr}.um-panel{padding:17px}.um-search{width:100%}}
+    </style>
+</head>
+<body>
+<div class="admin-layout">
+    {% include 'Admin/sidebar.html.twig' %}
+    <main class="admin-main">
+        <header class="admin-topbar">
+            <div><div class="breadcrumb">ADMIN / ACCOUNT MANAGEMENT</div><h1>User Management</h1></div>
+            <div class="admin-user"><div class="user-avatar">{{ admin_username|first|upper }}</div><div class="user-info"><strong>{{ admin_username }}</strong><span>Administrator</span></div></div>
+        </header>
+        <section class="admin-content um-wrap">
+            {% for message in app.flashes('success') %}<div class="um-flash success">{{ message }}</div>{% endfor %}
+            {% for message in app.flashes('error') %}<div class="um-flash error">{{ message }}</div>{% endfor %}
+
+            <section class="um-panel">
+                <div class="um-head"><div><span class="um-kicker">ACCOUNT OVERVIEW</span><h2>Back-office accounts</h2><div class="um-muted">Manage Admin and Staff access to the system.</div></div><span class="um-count">{{ total_accounts }} TOTAL ACCOUNTS</span></div>
+                <form class="um-search" method="get" action="{{ path('admin_users_index') }}" style="margin-top:18px"><input type="search" name="q" value="{{ query }}" placeholder="Search username, staff name or email"><button class="um-btn" type="submit">Search</button>{% if query %}<a class="um-btn light" href="{{ path('admin_users_index') }}">Clear</a>{% endif %}</form>
+            </section>
+
+            <section class="um-panel">
+                <div class="um-head"><div><span class="um-kicker">NEW ACCOUNT</span><h2>Create an account</h2><div class="um-muted">New passwords are securely hashed before storage.</div></div></div>
+                <form method="post" action="{{ path('admin_users_create') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('create_account') }}">
+                    <div class="um-grid">
+                        <div class="um-field"><label for="account_type">ACCOUNT ROLE</label><select id="account_type" name="account_type"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+                        <div class="um-field"><label for="new_username">USERNAME</label><input id="new_username" name="username" required minlength="3" maxlength="100" pattern="[A-Za-z0-9_-]+" placeholder="e.g. lawrsstaff02"></div>
+                        <div class="um-field staff-only"><label for="new_name">FULL NAME (STAFF)</label><input id="new_name" name="name" maxlength="100" placeholder="Staff full name"></div>
+                        <div class="um-field staff-only"><label for="new_email">EMAIL ADDRESS (STAFF)</label><input id="new_email" name="email" type="email" maxlength="150" placeholder="staff@lawrsburgers.com"></div>
+                        <div class="um-field"><label for="new_password">TEMPORARY PASSWORD</label><input id="new_password" name="password" type="password" required minlength="8" maxlength="255" autocomplete="new-password" placeholder="At least 8 characters"></div>
+                    </div>
+                    <div class="um-actions" style="margin-top:18px"><button class="um-btn" type="submit">+ Create Account</button></div>
+                </form>
+                <p class="um-note">Admin accounts use the existing Admin table (username and password only). Staff accounts include name, username, email, and active status. Role conversion is not offered because Admin and Staff are stored in separate tables.</p>
+            </section>
+
+            <section class="um-panel">
+                <div class="um-head"><div><span class="um-kicker">PRIVILEGED ACCESS</span><h2>Admin accounts</h2></div><span class="um-count">{{ admins|length }} ADMINS</span></div>
+                <div class="um-table-wrap"><table class="um-table"><thead><tr><th>Username</th><th>Date created</th><th>Role</th><th>Actions</th></tr></thead><tbody>
+                {% for account in admins %}<tr><td><strong>{{ account.username }}</strong>{% if app.session.get('admin_id') == account.id %}<span class="um-pill">YOU</span>{% endif %}</td><td>{{ account.created_at|date('M d, Y') }}</td><td><span class="um-pill">ADMIN</span></td><td><div class="um-actions"><a class="um-btn light" href="{{ path('admin_users_edit', {type:'admin', id:account.id}) }}">Edit</a>{% if app.session.get('admin_id') != account.id and admins|length > 1 %}<form method="post" action="{{ path('admin_users_delete', {type:'admin', id:account.id}) }}" onsubmit="return confirm('Delete this Admin account? This cannot be undone.');"><input type="hidden" name="_token" value="{{ csrf_token('delete_admin_' ~ account.id) }}"><button class="um-btn danger" type="submit">Delete</button></form>{% endif %}</div></td></tr>{% else %}<tr><td colspan="4" class="um-empty">No Admin accounts match your search.</td></tr>{% endfor %}
+                </tbody></table></div>
+            </section>
+
+            <section class="um-panel">
+                <div class="um-head"><div><span class="um-kicker">TEAM ACCESS</span><h2>Staff accounts</h2></div><span class="um-count">{{ staff|length }} STAFF</span></div>
+                <div class="um-table-wrap"><table class="um-table"><thead><tr><th>Name / Username</th><th>Email</th><th>Date created</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+                {% for account in staff %}<tr><td><strong>{{ account.name }}</strong><br><span class="um-muted">@{{ account.username }}</span></td><td>{{ account.email }}</td><td>{{ account.created_at ? account.created_at|date('M d, Y') : '—' }}</td><td><span class="um-pill {{ account.status }}">{{ account.status|upper }}</span></td><td><div class="um-actions"><a class="um-btn light" href="{{ path('admin_users_edit', {type:'staff', id:account.id}) }}">Edit</a><form method="post" action="{{ path('admin_users_staff_status', {id:account.id}) }}"><input type="hidden" name="_token" value="{{ csrf_token('staff_status_' ~ account.id) }}"><button class="um-btn {{ account.status == 'active' ? 'dark' : '' }}" type="submit">{{ account.status == 'active' ? 'Deactivate' : 'Activate' }}</button></form><form method="post" action="{{ path('admin_users_delete', {type:'staff', id:account.id}) }}" onsubmit="return confirm('Delete this Staff account?');"><input type="hidden" name="_token" value="{{ csrf_token('delete_staff_' ~ account.id) }}"><button class="um-btn danger" type="submit">Delete</button></form></div></td></tr>{% else %}<tr><td colspan="5" class="um-empty">No Staff accounts match your search.</td></tr>{% endfor %}
+                </tbody></table></div>
+            </section>
+        </section>
+    </main>
+</div>
+<script>
+(() => { const role=document.getElementById('account_type'); const staffFields=document.querySelectorAll('.staff-only'); const name=document.getElementById('new_name'); const email=document.getElementById('new_email'); const username=document.getElementById('new_username'); function sync(){const isStaff=role.value==='staff';staffFields.forEach(el=>el.style.display=isStaff?'grid':'none');name.required=isStaff;email.required=isStaff;username.maxLength=isStaff?50:100;} role.addEventListener('change',sync);sync(); })();
+</script>
+</body>
+</html>

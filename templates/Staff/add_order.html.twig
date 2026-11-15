@@ -1,0 +1,31 @@
+{% extends 'Admin/base.html.twig' %}
+{% block title %}Create Order | Staff Panel{% endblock %}
+{% block body %}
+<div class="admin-layout">
+    {% include 'Staff/sidebar.html.twig' %}
+    <main class="admin-main">
+        <header class="admin-topbar"><div><div class="breadcrumb">STAFF / ORDERS / NEW</div><h1>Create Order</h1></div><div class="admin-user"><div class="user-avatar">{{ staff_name|slice(0,1)|upper }}</div><div class="user-info"><strong>{{ staff_name }}</strong><span>Staff</span></div></div></header>
+        <section class="admin-content">
+            {% for message in app.flashes('error') %}<div class="admin-alert admin-alert-error">{{ message }}</div>{% endfor %}
+            <form method="post" class="admin-card" style="padding:28px">
+                <input type="hidden" name="_token" value="{{ csrf_token('staff_create_order') }}">
+                <h3>Customer Information</h3>
+                <div class="form-grid">
+                    <label>Existing Customer Account<select name="customer_id" required><option value="">Select customer account</option>{% for customer in customers %}<option value="{{ customer.id }}">{{ customer.name }} — {{ customer.email }}</option>{% endfor %}</select></label>
+                    <label>Customer Name<input required name="customer_name" maxlength="150"></label>
+                    <label>Contact Number<input required name="phone" maxlength="30"></label>
+                    <label style="grid-column:1/-1">Delivery Address<textarea required name="address" rows="2"></textarea></label>
+                    <label>Payment Method<select name="payment_method" required><option value="">Select payment</option><option>Cash on Delivery</option><option>GCash</option></select></label>
+                    <label>GCash Reference Number<input name="gcash_reference" maxlength="100" placeholder="Required for GCash payments"></label>
+                </div>
+                <h3 style="margin-top:28px">Order Items</h3>
+                <p>Select quantities. Prices and totals are calculated from the current burger records.</p>
+                <div class="table-wrapper"><table class="admin-table"><thead><tr><th>Burger</th><th>Price</th><th>Available Stock</th><th>Quantity</th></tr></thead><tbody>
+                {% for burger in burgers %}<tr><td>{{ burger.name }}</td><td>₱{{ burger.price|number_format(2) }}</td><td>{{ burger.stock_quantity }}</td><td><input type="number" name="quantities[{{ burger.id }}]" min="0" max="{{ burger.stock_quantity }}" value="0" style="width:90px"></td></tr>{% else %}<tr><td colspan="4">No available burgers in stock.</td></tr>{% endfor %}
+                </tbody></table></div>
+                <div style="display:flex;gap:12px;margin-top:24px"><button class="btn-primary" type="submit">Create Order</button><a class="btn-secondary" href="{{ path('admin_orders') }}">Cancel</a></div>
+            </form>
+        </section>
+    </main>
+</div>
+{% endblock %}

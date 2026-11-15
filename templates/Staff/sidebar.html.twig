@@ -1,0 +1,79 @@
+<aside class="admin-sidebar">
+    <div class="sidebar-brand"><div class="brand-main">LAWR'S</div><div class="brand-sub">BURGERS</div><div class="sidebar-admin-label">STAFF PANEL</div></div>
+    <nav class="admin-nav">
+        <a href="{{ path('staff_dashboard') }}" class="nav-item {{ app.request.attributes.get('_route') == 'staff_dashboard' ? 'active' : '' }}"><span class="nav-icon">▣</span><span>Dashboard</span></a>
+        <a href="{{ path('admin_burgers') }}" class="nav-item {{ app.request.attributes.get('_route') starts with 'admin_burger' or app.request.attributes.get('_route') == 'admin_burgers' ? 'active' : '' }}"><span class="nav-icon">🍔</span><span>Burgers</span></a>
+        <a href="{{ path('admin_orders') }}" class="nav-item {{ app.request.attributes.get('_route') starts with 'admin_order' ? 'active' : '' }}" id="staff-orders-nav">
+            <span class="nav-icon">🛒</span>
+            <span>Orders</span>
+            <span id="staff-orders-dot" class="staff-orders-notification-dot" aria-label="Unprocessed new orders" title="New orders need attention" hidden></span>
+        </a>
+        <a href="{{ path('staff_reviews') }}" class="nav-item {{ app.request.attributes.get('_route') starts with 'staff_review' ? 'active' : '' }}"><span class="nav-icon">⭐</span><span>Reviews</span></a>
+        <div class="nav-divider"></div>
+        <a href="{{ path('home') }}" class="nav-item" target="_blank"><span class="nav-icon">↗</span><span>View Website</span></a>
+        <a href="{{ path('app_logout') }}" class="nav-item logout-link"><span class="nav-icon">⇥</span><span>Logout</span></a>
+    </nav>
+    <div class="sidebar-footer"><p>Lawr's Burgers</p><span>Staff Operations Panel</span></div>
+</aside>
+
+<script>
+(() => {
+    const token = '{{ csrf_token("staff_presence") }}';
+    const sendHeartbeat = () => {
+        if (document.visibilityState === 'hidden') return;
+        fetch('{{ path("staff_presence_heartbeat") }}', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' }
+        }).catch(() => {});
+    };
+    sendHeartbeat();
+    window.setInterval(sendHeartbeat, 25000);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') sendHeartbeat();
+    });
+
+    // One shared count for all Staff accounts. The dot remains until every
+    // Pending order is moved to another processing status.
+    const ordersDot = document.getElementById('staff-orders-dot');
+    const refreshPendingOrders = () => {
+        if (!ordersDot || document.visibilityState === 'hidden') return;
+        fetch('{{ path("staff_orders_pending_count") }}', {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            cache: 'no-store'
+        })
+        .then(response => response.ok ? response.json() : null)
+        .then(data => {
+            if (!data || !data.ok) return;
+            ordersDot.hidden = Number(data.count) < 1;
+        })
+        .catch(() => {});
+    };
+    refreshPendingOrders();
+    window.setInterval(refreshPendingOrders, 15000);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') refreshPendingOrders();
+    });
+})();
+</script>
+
+<style>
+    .staff-orders-notification-dot {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        min-width: 9px;
+        margin-left: auto;
+        border-radius: 50%;
+        background: #e53935;
+        box-shadow: 0 0 0 3px rgba(229, 57, 53, .16);
+        animation: staff-order-pulse 1.8s ease-in-out infinite;
+    }
+    .staff-orders-notification-dot[hidden] { display: none !important; }
+    @keyframes staff-order-pulse {
+        0%, 100% { box-shadow: 0 0 0 3px rgba(229, 57, 53, .16); }
+        50% { box-shadow: 0 0 0 6px rgba(229, 57, 53, .06); }
+    }
+</style>

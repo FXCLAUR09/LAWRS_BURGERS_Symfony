@@ -1,0 +1,179 @@
+
+{# 
+    Shared Lawr's Burgers order receipt template.
+
+    Required variables:
+      order        - associative array containing the order details
+      receiptItems - array of order item rows
+
+    Reusable by both Admin and Customer order pages.
+#}
+
+{% set receiptOrderId = order.id|default(0) %}
+{% set receiptStatus = order.status|default('')|trim %}
+{% set receiptIsCompleted = receiptStatus|lower == 'completed' %}
+
+{% set receiptCreatedAt = order.created_at|default(null)
+    ? order.created_at|date('M d, Y h:i A')
+    : '—'
+%}
+
+{% set receiptCompletedAt = order.updated_at|default(null)
+    ? order.updated_at|date('M d, Y h:i A')
+    : '—'
+%}
+
+<section class="admin-card final-receipt-card" aria-label="Order receipt">
+
+    <div class="receipt-header">
+        <div class="receipt-title-wrap">
+            <div class="receipt-icon" aria-hidden="true">🧾</div>
+
+            <div>
+                <h3>Order Receipt</h3>
+                <p>Final receipt for Order #{{ receiptOrderId }}</p>
+            </div>
+        </div>
+
+        {% if receiptIsCompleted %}
+            <span class="receipt-completed">
+                ✓ Order Completed
+            </span>
+        {% else %}
+            <span class="receipt-completed">
+                {{ receiptStatus is not empty ? receiptStatus : 'Order Received' }}
+            </span>
+        {% endif %}
+    </div>
+
+    <div class="receipt-meta">
+
+        <div class="receipt-meta-item">
+            <span>Customer</span>
+            <strong>{{ order.customer_name|default('—') }}</strong>
+        </div>
+
+        <div class="receipt-meta-item">
+            <span>Phone</span>
+            <strong>{{ order.phone|default('—') }}</strong>
+        </div>
+
+        <div class="receipt-meta-item">
+            <span>Order Number</span>
+            <strong>#{{ receiptOrderId }}</strong>
+        </div>
+
+        <div class="receipt-meta-item">
+            <span>Order Date</span>
+            <strong>{{ receiptCreatedAt }}</strong>
+        </div>
+
+        <div class="receipt-meta-item">
+            <span>{{ receiptIsCompleted ? 'Completed Date' : 'Last Updated' }}</span>
+            <strong>{{ receiptCompletedAt }}</strong>
+        </div>
+
+        <div class="receipt-meta-item">
+            <span>Payment Method</span>
+            <strong>{{ order.payment_method|default('—') }}</strong>
+        </div>
+
+        <div class="receipt-meta-item">
+            <span>Payment Status</span>
+            <strong>{{ order.payment_status|default('Unpaid') }}</strong>
+        </div>
+
+        {% if order.gcash_reference|default('') is not empty %}
+            <div class="receipt-meta-item">
+                <span>GCash Reference</span>
+                <strong>{{ order.gcash_reference }}</strong>
+            </div>
+        {% endif %}
+
+        <div class="receipt-meta-item">
+            <span>Delivery Address</span>
+            <strong>{{ order.address|default('—')|nl2br }}</strong>
+        </div>
+
+    </div>
+
+    <div class="receipt-items">
+
+        <div class="receipt-items-title">
+            Ordered Items
+        </div>
+
+        {% if receiptItems|default([]) is not empty %}
+
+            {% for receiptItem in receiptItems %}
+
+                <div class="receipt-item">
+
+                    <div class="receipt-item-name">
+                        {{ receiptItem.burger_name|default('Burger') }}
+                    </div>
+
+                    <div class="receipt-item-value receipt-price">
+                        ₱{{ (receiptItem.price|default(0))|number_format(2, '.', ',') }}
+                    </div>
+
+                    <div class="receipt-item-value">
+                        × {{ receiptItem.quantity|default(0) }}
+                    </div>
+
+                    <div class="receipt-item-subtotal">
+                        ₱{{ (receiptItem.subtotal|default(0))|number_format(2, '.', ',') }}
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="receipt-item">
+                <div class="receipt-item-name">
+                    No order items found.
+                </div>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    <div class="receipt-total">
+        <span>Order Total</span>
+
+        <strong>
+            ₱{{ (order.total|default(0))|number_format(2, '.', ',') }}
+        </strong>
+    </div>
+
+    {% if order.notes|default('') is not empty %}
+
+        <div class="receipt-meta receipt-notes">
+
+            <div class="receipt-meta-item">
+                <span>Order Notes</span>
+                <strong>{{ order.notes|nl2br }}</strong>
+            </div>
+
+        </div>
+
+    {% endif %}
+
+    <div class="receipt-footer">
+
+        {% if receiptIsCompleted %}
+
+            This order is completed. Keep this receipt for your records.
+
+        {% else %}
+
+            Keep this receipt for your records. Payment and order status may still be updated.
+
+        {% endif %}
+
+    </div>
+
+</section>

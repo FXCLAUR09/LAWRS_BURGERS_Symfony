@@ -1,0 +1,269 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Restock Burger | Lawr's Burgers Admin</title>
+
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+
+<body>
+<div class="admin-layout">
+
+    {# Shared sidebar, if your project has this Twig partial. #}
+    {% include 'Admin/sidebar.html.twig' ignore missing %}
+
+    <main class="admin-main">
+
+        <header class="admin-topbar">
+            <div>
+                <div class="breadcrumb">{{ app.session.get('staff_id') ? 'STAFF / BURGERS / RESTOCK' : 'ADMIN / BURGERS / RESTOCK' }}</div>
+                <h1>Restock Burger</h1>
+            </div>
+
+            <div class="admin-user">
+                <div class="user-avatar">
+                    {{ (admin_username|default('Admin'))|first|upper }}
+                </div>
+
+                <div class="user-info">
+                    <strong>{{ admin_username|default('Admin') }}</strong>
+                    <span>{{ app.session.get('staff_id') ? 'Staff' : 'Administrator' }}</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="admin-content">
+            <div class="restock-page">
+                <div class="restock-card">
+
+                    <div class="restock-header">
+                        <span class="card-label">INVENTORY MANAGEMENT</span>
+                        <h2>Restock Burger</h2>
+                        <p>Add stock to an existing burger without creating a new burger.</p>
+                    </div>
+
+                    {% if error %}
+                        <div class="alert alert-error" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endif %}
+
+                    {% if success %}
+                        <div class="alert alert-success" role="status">
+                            {{ success }}
+                        </div>
+                    {% endif %}
+
+                    <form
+                        method="POST"
+                        action="{{ path('admin_burger_restock') }}"
+                        id="restockForm"
+                    >
+                        <div class="form-group">
+                            <label for="burger_id">Select Burger</label>
+
+                            <select name="burger_id" id="burger_id" required>
+                                <option value="">-- Select an existing burger --</option>
+
+                                {% for burger in burgers %}
+                                    <option
+                                        value="{{ burger.id }}"
+                                        {% if selected_burger_id == burger.id %}selected{% endif %}
+                                    >
+                                        {{ burger.name }} — Stock: {{ burger.stock_quantity }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div
+                            class="selected-burger-card{% if selected_burger %} show{% endif %}"
+                            id="selectedBurgerCard"
+                        >
+                            <div class="selected-burger-content">
+
+                                <div class="selected-burger-image" id="selectedBurgerImage">
+                                    {% if selected_burger and selected_burger.image %}
+                                        <img
+                                            src="{{ asset('assets/' ~ selected_burger.image) }}"
+                                            alt="{{ selected_burger.name }}"
+                                        >
+                                    {% else %}
+                                        🍔
+                                    {% endif %}
+                                </div>
+
+                                <div class="selected-burger-details">
+                                    <h3 id="selectedBurgerName">
+                                        {{ selected_burger ? selected_burger.name : '' }}
+                                    </h3>
+
+                                    <p id="selectedBurgerCategory">
+                                        {{ selected_burger ? selected_burger.category : '' }}
+                                    </p>
+
+                                    <div class="current-stock">
+                                        Current Stock:
+                                        <span class="current-stock-number" id="currentStock">
+                                            {{ selected_burger ? selected_burger.stock_quantity : 0 }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="add_stock">Stock to Add</label>
+
+                            <input
+                                type="number"
+                                name="add_stock"
+                                id="add_stock"
+                                min="1"
+                                step="1"
+                                inputmode="numeric"
+                                placeholder="Enter quantity to add"
+                                value="{{ add_stock }}"
+                                required
+                            >
+
+                            <div class="stock-preview" id="stockPreview">
+                                <span class="stock-preview-label">
+                                    New Stock After Restock
+                                </span>
+
+                                <span class="stock-preview-value" id="newStock">0</span>
+                            </div>
+                        </div>
+
+                        <div class="restock-actions">
+                            <a href="{{ path('admin_burgers') }}" class="back-button">
+                                ← Back to Burgers
+                            </a>
+
+                            <button
+                                type="submit"
+                                name="restock"
+                                value="1"
+                                class="restock-submit"
+                            >
+                                ↻ Restock Burger
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </section>
+
+        <footer class="admin-footer">
+            <span>© {{ "now"|date("Y") }} Lawr's Burgers</span>
+            <span>Admin Panel</span>
+        </footer>
+
+    </main>
+</div>
+
+<script>
+    const burgers = {{ burgers|json_encode|raw }};
+
+    const burgerSelect = document.getElementById('burger_id');
+    const addStockInput = document.getElementById('add_stock');
+    const selectedBurgerCard = document.getElementById('selectedBurgerCard');
+    const selectedBurgerImage = document.getElementById('selectedBurgerImage');
+    const selectedBurgerName = document.getElementById('selectedBurgerName');
+    const selectedBurgerCategory = document.getElementById('selectedBurgerCategory');
+    const currentStock = document.getElementById('currentStock');
+    const stockPreview = document.getElementById('stockPreview');
+    const newStock = document.getElementById('newStock');
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function getSelectedBurger() {
+        const selectedId = Number.parseInt(burgerSelect.value, 10);
+
+        return burgers.find(
+            burger => Number.parseInt(burger.id, 10) === selectedId
+        );
+    }
+
+    function updateStockPreview() {
+        const burger = getSelectedBurger();
+        const quantityText = addStockInput.value.trim();
+        const quantity = Number(quantityText);
+
+        if (
+            !burger ||
+            quantityText === '' ||
+            !Number.isSafeInteger(quantity) ||
+            quantity <= 0
+        ) {
+            stockPreview.classList.remove('show');
+            return;
+        }
+
+        const current = Number(burger.stock_quantity);
+        const total = current + quantity;
+
+        if (!Number.isSafeInteger(total)) {
+            stockPreview.classList.remove('show');
+            return;
+        }
+
+        newStock.textContent = total;
+        stockPreview.classList.add('show');
+    }
+
+    function updateBurgerInfo() {
+        const burger = getSelectedBurger();
+
+        if (!burger) {
+            selectedBurgerCard.classList.remove('show');
+            selectedBurgerName.textContent = '';
+            selectedBurgerCategory.textContent = '';
+            currentStock.textContent = '0';
+            selectedBurgerImage.textContent = '🍔';
+            stockPreview.classList.remove('show');
+            return;
+        }
+
+        selectedBurgerCard.classList.add('show');
+        selectedBurgerName.textContent = burger.name;
+        selectedBurgerCategory.textContent = burger.category || '';
+        currentStock.textContent = burger.stock_quantity;
+
+        if (burger.image) {
+            const imageUrl = {{ asset('assets/')|json_encode|raw }} +
+            encodeURIComponent(burger.image);
+
+            selectedBurgerImage.innerHTML =
+                '<img src="' + escapeHtml(imageUrl) +
+                '" alt="' + escapeHtml(burger.name) + '">';
+        } else {
+            selectedBurgerImage.textContent = '🍔';
+        }
+
+        updateStockPreview();
+    }
+
+    burgerSelect.addEventListener('change', updateBurgerInfo);
+    addStockInput.addEventListener('input', updateStockPreview);
+
+    updateBurgerInfo();
+</script>
+
+</body>
+</html>
